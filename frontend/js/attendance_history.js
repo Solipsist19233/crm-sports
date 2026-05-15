@@ -262,11 +262,23 @@ async function exportToPDF() {
 
     // Створюємо копію таблиці без колонки "Дії"
     const printContainer = document.createElement('div');
-    // Додаємо контейнер з фіксованою шириною для коректного рендерингу таблиці
-    printContainer.style.width = '1000px'; 
-    printContainer.style.padding = '20px';
-    printContainer.style.backgroundColor = 'white';
-    printContainer.innerHTML = reportHeader + element.innerHTML;
+    
+    // Додаємо стилі безпосередньо в контейнер для ПДФ
+    const pdfStyles = `
+        <style>
+            table { width: 100%; border-collapse: collapse; margin-top: 10px; font-family: Arial, sans-serif; }
+            th, td { border: 1px solid #444; padding: 8px; text-align: left; font-size: 11px; }
+            th { background-color: #f3f4f6; font-weight: bold; color: #111; }
+            tr:nth-child(even) { background-color: #fafafa; }
+            .text-right { text-align: right; }
+            .text-success { color: #059669; font-weight: bold; }
+            .badge { font-weight: 600; text-transform: uppercase; font-size: 9px; }
+            tfoot tr { background-color: #eee !important; font-weight: bold; border-top: 2px solid #000; }
+            h2, p { font-family: Arial, sans-serif; }
+        </style>
+    `;
+
+    printContainer.innerHTML = pdfStyles + reportHeader + element.innerHTML;
     
     // Видаляємо останню колонку (Дії) з кожного рядка для чистого звіту
     const actionsHeader = printContainer.querySelector('th:last-child');
@@ -275,9 +287,16 @@ async function exportToPDF() {
     const actionCells = printContainer.querySelectorAll('td:last-child');
     actionCells.forEach(cell => cell.remove());
 
-    // Примусово показуємо футер, якщо він прихований
-    const tfooter = printContainer.querySelector('tfoot');
-    if (tfooter) tfooter.classList.remove('hidden');
+    // ПЕРЕВІРКА ТА ВИПРАВЛЕННЯ СУМИ:
+    // Примусово показуємо футер та переконуємось, що він має правильний клас
+    const tfooter = printContainer.querySelector('#historyTableFooter');
+    if (tfooter) {
+        tfooter.style.display = 'table-footer-group'; // Гарантує відображення в таблиці
+        tfooter.classList.remove('hidden');
+    }
+
+    printContainer.style.width = '1000px';
+    printContainer.style.backgroundColor = 'white';
 
     // Налаштування PDF
     const opt = {
