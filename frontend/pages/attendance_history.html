@@ -79,8 +79,8 @@
                     <h1>Історія відвідувань</h1>
                 </div>
             </header>
-        <div class="content-body" style="padding: 20px;">
-            <div class="filters-section">
+        <main class="content-body" style="padding: 20px;">
+            <div class="filters-bar" style="display: flex; gap: 15px; flex-wrap: wrap; background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 20px; align-items: flex-end;">
                 <div class="filter-group">
                     <label for="dateFromFilter">З дати:</label>
                     <input type="date" id="dateFromFilter">
@@ -100,8 +100,10 @@
                         <option value="">Всі тренери</option>
                     </select>
                 </div>
-                <button class="btn btn-primary" id="applyFiltersBtn"><i class="fas fa-filter"></i> Застосувати фільтри</button>
-                <button class="btn btn-secondary" id="resetFiltersBtn"><i class="fas fa-redo"></i> Скинути</button>
+                <div class="filter-group">
+                    <button class="btn btn-primary" id="applyFiltersBtn"><i class="fas fa-filter"></i> Фільтр</button>
+                    <button class="btn btn-secondary" id="resetFiltersBtn"><i class="fas fa-redo"></i></button>
+                </div>
             </div>
 
             <div class="action-bar">
@@ -126,7 +128,6 @@
                     </tbody>
                 </table>
             </div>
-        </div>
         </main>
     </div>
 

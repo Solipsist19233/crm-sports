@@ -1,8 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import func, or_
-from typing import List
-from datetime import date, timedelta
+from typing import List, Optional
+from datetime import date, datetime, timedelta
 
 from app.core.database import get_db
 from app.api.auth import get_current_user
@@ -10,6 +10,56 @@ from app.models.models import Attendance, Student, Subscription, User, Group, Tr
 from app.schemas.schemas import AttendanceCreate, AttendanceUpdate, AttendanceResponse
 
 router = APIRouter(prefix="/api/attendance", tags=["Attendance"])
+
+@router.get("/history")
+async def get_attendance_history(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+    date_from: Optional[date] = Query(None),
+    date_to: Optional[date] = Query(None),
+    student_id: Optional[int] = Query(None),
+    trainer_id: Optional[int] = Query(None)
+):
+    """Отримання історії відвідувань з приєднанням даних про учня, групу та тренера."""
+    query = db.query(
+        Attendance.id,
+        Attendance.date,
+        Attendance.status,
+        Attendance.payment_choice,
+        Attendance.is_paid,
+        Student.first_name.label("student_first_name"),
+        Student.last_name.label("student_last_name"),
+        Group.name.label("assignment_group_name"),
+        Trainer.first_name.label("assignment_trainer_first_name"),
+        Trainer.last_name.label("assignment_trainer_last_name")
+    ).join(Student, Attendance.student_id == Student.id)\
+     .outerjoin(Group, Student.group_id == Group.id)\
+     .outerjoin(Trainer, or_(Student.trainer_id == Trainer.id, Group.trainer_id == Trainer.id))
+
+    if date_from:
+        query = query.filter(Attendance.date >= date_from)
+    if date_to:
+        query = query.filter(Attendance.date <= date_to)
+    if student_id:
+        query = query.filter(Attendance.student_id == student_id)
+    if trainer_id:
+        query = query.filter(or_(Student.trainer_id == trainer_id, Group.trainer_id == trainer_id))
+
+    # Якщо залогінений тренер, фільтруємо лише його записи
+    if current_user.role == "trainer" and current_user.trainer:
+        t_id = current_user.trainer.id
+        query = query.filter(or_(Student.trainer_id == t_id, Group.trainer_id == t_id))
+
+    results = query.order_by(Attendance.date.desc()).all()
+    return [dict(r._mapping) for r in results]
+
+@router.post("/finalize", status_code=200)
+async def finalize_attendance_to_history(
+    history_entries: List[dict],
+    db: Session = Depends(get_db)
+):
+    """Заглушка для сумісності з фронтендом (дані вже в основній таблиці)."""
+    return {"message": "Дані синхронізовано"}
 
 @router.get("/", response_model=List[AttendanceResponse])
 async def get_attendance(
