@@ -297,19 +297,51 @@ async def update_attendance_history_entry(
     if not db_entry:
         raise HTTPException(status_code=404, detail="Запис не знайдено")
     
-    update_data = history_update.model_dump(exclude_unset=True)
-    
-    # Забороняємо тренеру міняти оплату в історії
-    if current_user.role == "trainer":
-        update_data.pop("is_paid", None)
-        update_data.pop("payment_choice", None)
+    try:
+        # Запам'ятовуємо чи було списання до оновлення
+        was_paid_subscription = (_is_subscription_payment(db_entry.payment_choice, db) and db_entry.is_paid)
 
-    for field, value in update_data.items():
-        setattr(db_entry, field, value)
+        update_data = history_update.model_dump(exclude_unset=True)
+        
+        # Забороняємо тренеру міняти оплату в історії
+        if current_user.role == "trainer":
+            update_data.pop("is_paid", None)
+            update_data.pop("payment_choice", None)
 
-    db.commit()
-    db.refresh(db_entry)
-    return db_entry
+        for field, value in update_data.items():
+            setattr(db_entry, field, value)
+
+        db.flush() # Синхронізуємо стани для перевірки абонемента
+
+        is_now_subscription = _is_subscription_payment(db_entry.payment_choice, db)
+
+        # 1. Якщо раніше НЕ було списання, а тепер адмін поставив "Оплачено" абонементом — списуємо
+        if not was_paid_subscription and is_now_subscription and db_entry.is_paid:
+            active_subscription = db.query(Subscription).filter(
+                Subscription.student_id == db_entry.student_id,
+                Subscription.is_active == True,
+                Subscription.classes_remaining > 0
+            ).first()
+            if active_subscription:
+                active_subscription.classes_remaining -= 1
+                if active_subscription.classes_remaining == 0:
+                    active_subscription.is_active = False
+
+        # 2. Якщо раніше БУЛО списання, а тепер статус змінили — повертаємо заняття
+        elif was_paid_subscription and (not is_now_subscription or not db_entry.is_paid):
+            active_subscription = db.query(Subscription).filter(
+                Subscription.student_id == db_entry.student_id
+            ).order_by(Subscription.id.desc()).first()
+            if active_subscription:
+                active_subscription.classes_remaining += 1
+                active_subscription.is_active = True
+
+        db.commit()
+        db.refresh(db_entry)
+        return db_entry
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Помилка оновлення історії: {str(e)}")
 
 @router.put("/{attendance_id}", response_model=AttendanceResponse)
 async def update_attendance(
