@@ -8,31 +8,79 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
 <body>
-    <div class="sidebar">
-        <div class="sidebar-header">
-            <h2>CRM</h2>
-            <button id="mobileToggle" class="mobile-toggle-btn"><i class="fas fa-bars"></i></button>
-        </div>
-        <ul class="nav-links">
-            <li><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Дашборд</a></li>
-            <li><a href="students.html"><i class="fas fa-user-graduate"></i> Учні</a></li>
-            <li><a href="groups.html"><i class="fas fa-users"></i> Групи</a></li>
-            <li><a href="trainers.html"><i class="fas fa-user-tie"></i> Тренери</a></li>
-            <li><a href="assignments.html"><i class="fas fa-calendar-alt"></i> Призначення</a></li>
-            <li><a href="attendance.html"><i class="fas fa-clipboard-check"></i> Відвідування</a></li>
-            <li id="historyLink"><a href="attendance_history.html" class="active"><i class="fas fa-history"></i> Історія відвідувань</a></li>
-            <li><a href="payments.html"><i class="fas fa-money-bill-wave"></i> Оплати</a></li>
-            <li><a href="subscriptions.html"><i class="fas fa-receipt"></i> Абонементи</a></li>
-            <li id="pricesLink"><a href="prices.html"><i class="fas fa-tags"></i> Прайс-лист</a></li>
-            <li id="usersLink"><a href="users.html"><i class="fas fa-users-cog"></i> Користувачі</a></li>
-            <li><a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Вийти</a></li>
-        </ul>
-        <div class="user-info">
-            <span id="userName"></span> (<span id="userRoleDisplay"></span>)
-        </div>
-    </div>
-    <div class="main-content">
-        <div class="header">
+    <div id="loadingSpinner" class="loading-spinner hidden"><div class="spinner-icon"></div></div>
+    <div id="sidebarOverlay" class="sidebar-overlay"></div>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-dumbbell"></i>
+                <h2>CRM Школа</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item">
+                    <i class="fas fa-home"></i>
+                    <span>Дашборд</span>
+                </a>
+                <a href="students.html" class="nav-item">
+                    <i class="fas fa-users"></i>
+                    <span>Учні</span>
+                </a>
+                <a href="attendance.html" class="nav-item">
+                    <i class="fas fa-clipboard-check"></i>
+                    <span>Відвідування</span>
+                </a>
+                <a href="attendance_history.html" class="nav-item active" id="historyLink">
+                    <i class="fas fa-history"></i>
+                    <span>Історія відвідувань</span>
+                </a>
+                <a href="assignments.html" class="nav-item" id="assignmentsLink">
+                    <i class="fas fa-magic"></i>
+                    <span>Призначення</span>
+                </a>
+                <a href="prices.html" class="nav-item" id="pricesLink">
+                    <i class="fas fa-tags"></i>
+                    <span>Прайс-лист</span>
+                </a>
+                <a href="groups.html" class="nav-item">
+                    <i class="fas fa-layer-group"></i>
+                    <span>Групи</span>
+                </a>
+                <a href="subscriptions.html" class="nav-item" id="subscriptionsLink">
+                    <i class="fas fa-ticket-alt"></i>
+                    <span>Абонементи</span>
+                </a>
+                <a href="users.html" class="nav-item" id="usersLink" style="display: none;">
+                    <i class="fas fa-user-cog"></i>
+                    <span>Користувачі</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <i class="fas fa-user-circle"></i>
+                    <div>
+                        <p id="userName">Користувач</p>
+                        <small id="userRoleDisplay">Роль</small>
+                    </div>
+                </div>
+                <button class="btn-logout" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Вийти
+                </button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="content-header">
+                <div class="header-title-wrap">
+                    <button class="mobile-toggle" id="mobileToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1>Історія відвідувань</h1>
+                </div>
+            </header>
+
+        <div class="container">
+            <div class="filters-bar">
             <h1>Історія відвідувань</h1>
         </div>
         <div class="container">
