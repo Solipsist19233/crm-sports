@@ -75,7 +75,7 @@ async function loadHistoryRecords() {
     if (trainerId) params.trainer_id = trainerId;
 
     try {
-        allHistoryRecords = await attendanceAPI.getHistory(params);
+        allHistoryRecords = await attendanceAPI.getHistory(params) || [];
         renderHistoryTable(allHistoryRecords);
     } catch (error) {
         console.error('Помилка завантаження історії відвідувань:', error);

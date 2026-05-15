@@ -107,8 +107,10 @@ async function apiRequest(endpoint, options = {}) {
         headers['Authorization'] = `Bearer ${token}`;
     }
 
-    // Якщо API_BASE_URL порожній, використовуємо відносний шлях, що автоматично підхопить HTTPS
-    const url = API_BASE_URL ? `${API_BASE_URL}${endpoint}` : endpoint;
+    // Уникаємо проблем з Mixed Content на Railway
+    // Якщо endpoint починається з /, fetch зробить запит відносно поточного домену і протоколу (HTTPS)
+    let url = API_BASE_URL ? `${API_BASE_URL}${endpoint}` : endpoint;
+    if (!API_BASE_URL && !url.startsWith('/')) url = '/' + url;
 
     try {
         const response = await fetch(url, {
