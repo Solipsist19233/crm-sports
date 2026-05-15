@@ -128,10 +128,12 @@ async function loadAssignmentsForDate(selectedDate, dateFrom = null, dateTo = nu
 
                 assignment.students = assignment.students.map(student => {
                     const studentId = student.student_id || student.id;
-                    // Шукаємо відмітку саме для цього учня І на цю конкретну дату заняття
+                    const targetGroupId = assignment.group_id || assignment.group?.id;
+                    // Шукаємо відмітку саме для цього учня, дати І групи
                     const record = attendanceRecords.find(r => 
                         r.student_id === studentId && 
-                        String(r.date).split('T')[0] === lessonDateStr
+                        String(r.date).split('T')[0] === lessonDateStr &&
+                        r.group_id === targetGroupId
                     );
 
                     if (record) {

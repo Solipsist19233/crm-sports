@@ -215,7 +215,8 @@ async def mark_attendance(
         # Перевірка, чи вже є відмітка на цю дату
         existing = db.query(Attendance).filter(
             Attendance.student_id == attendance.student_id,
-            Attendance.date == attendance.date
+            Attendance.date == attendance.date,
+            Attendance.group_id == attendance.group_id
         ).first()
 
         if existing:
