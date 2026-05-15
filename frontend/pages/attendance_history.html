@@ -115,6 +115,7 @@
                         <button class="btn btn-primary" id="applyFiltersBtn" title="Застосувати"><i class="fas fa-filter"></i></button>
                         <button class="btn btn-secondary" id="resetFiltersBtn" title="Скинути"><i class="fas fa-redo"></i></button>
                         <button class="btn btn-outline-danger" id="cleanupHistoryBtn" title="Очистити стару історію"><i class="fas fa-broom"></i></button>
+                        <button class="btn btn-success" id="exportPdfBtn" title="Експорт у PDF"><i class="fas fa-file-pdf"></i> PDF</button>
                     </div>
                 </div>
             </div>
@@ -131,12 +132,16 @@
                             <th>Учень</th>
                             <th>Статус</th>
                             <th>Оплата</th>
+                            <th>Сума</th>
                             <th>Дії</th>
                         </tr>
                     </thead>
                     <tbody id="historyTableBody">
                         <!-- History records will be loaded here -->
                     </tbody>
+                    <tfoot id="historyTableFooter" class="hidden">
+                        <!-- Totals will be here -->
+                    </tfoot>
                 </table>
                 </div>
             </div>
@@ -174,6 +179,7 @@
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="../js/config.js?v=1.1"></script>
     <script src="../js/utils.js?v=1.1"></script>
     <script src="../js/api.js?v=1.1"></script>

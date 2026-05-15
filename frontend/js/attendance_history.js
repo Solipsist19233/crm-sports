@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('applyFiltersBtn').addEventListener('click', loadHistoryRecords);
         document.getElementById('resetFiltersBtn').addEventListener('click', resetFilters);
         document.getElementById('cleanupHistoryBtn').addEventListener('click', cleanupOldHistory);
+        document.getElementById('exportPdfBtn').addEventListener('click', exportToPDF);
 
         window.openEditHistoryModal = openEditHistoryModal;
         window.closeEditHistoryModal = closeEditHistoryModal;
@@ -94,12 +95,20 @@ function renderHistoryTable(records) {
         return;
     }
 
+    let totalProfit = 0;
+
     tbody.innerHTML = records.map(r => {
         // Отримуємо дані учня для запасного варіанту
         const student = allStudents.find(s => s.id === r.student_id);
         
         const studentName = r.student_first_name && r.student_last_name ? `${r.student_first_name} ${r.student_last_name}` : `ID: ${r.student_id}`;
         
+        const priceItem = allPrices.find(p => String(p.id) === String(r.payment_choice));
+        // Рахуємо суму: якщо оплачено і це не абонемент (або ми хочемо бачити номінальний прибуток)
+        // Для звіту зазвичай цікаво бачити вартість заняття
+        const rowAmount = (r.is_paid && priceItem) ? parseFloat(priceItem.price) : 0;
+        if (r.status === 'present') totalProfit += rowAmount;
+
         // Пріоритет: дані з запису історії -> дані з поточних налаштувань учня -> "Невідомо"
         const trainerName = r.assignment_trainer_first_name && r.assignment_trainer_last_name 
             ? `${r.assignment_trainer_first_name} ${r.assignment_trainer_last_name}` 
@@ -126,6 +135,7 @@ function renderHistoryTable(records) {
                         ${paymentText} (${r.is_paid ? 'Оплачено' : 'Не оплачено'})
                     </span>
                 </td>
+                <td><strong>${rowAmount > 0 ? rowAmount + ' ₴' : '—'}</strong></td>
                 <td>
                     <button class="btn-icon" onclick="openEditHistoryModal(${r.id})" title="Редагувати">
                         <i class="fas fa-edit"></i>
@@ -137,6 +147,19 @@ function renderHistoryTable(records) {
             </tr>
         `;
     }).join('');
+
+    // Оновлюємо підсумок (футер)
+    const footer = document.getElementById('historyTableFooter');
+    if (footer) {
+        footer.classList.remove('hidden');
+        footer.innerHTML = `
+            <tr style="background: #f3f4f6; font-weight: bold;">
+                <td colspan="4" class="text-right">Всього за період (присутні):</td>
+                <td>${records.filter(r => r.status === 'present').length} відв.</td>
+                <td colspan="2" class="text-success" style="font-size: 1.1rem;">${totalProfit.toFixed(2)} ₴</td>
+            </tr>
+        `;
+    }
 }
 
 function resetFilters() {
@@ -145,6 +168,8 @@ function resetFilters() {
     document.getElementById('studentSearchInput').value = '';
     document.getElementById('trainerFilter').value = '';
     document.getElementById('paymentFilter').value = '';
+    const footer = document.getElementById('historyTableFooter');
+    if (footer) footer.classList.add('hidden');
     loadHistoryRecords();
 }
 
@@ -216,5 +241,50 @@ async function cleanupOldHistory() {
         } finally {
             setBtnLoading('cleanupHistoryBtn', false, '<i class="fas fa-broom"></i> Очистити стару історію');
         }
+    }
+}
+
+async function exportToPDF() {
+    const element = document.querySelector('.table-card');
+    const dateFrom = document.getElementById('dateFromFilter').value || 'початок';
+    const dateTo = document.getElementById('dateToFilter').value || 'сьогодні';
+    
+    // Створюємо заголовок для звіту
+    const reportHeader = `
+        <div style="text-align: center; margin-bottom: 20px; font-family: sans-serif;">
+            <h2 style="color: #4f46e5;">Звіт по відвідуванням та прибутку</h2>
+            <p>Період: <strong>${formatDate(dateFrom)} — ${formatDate(dateTo)}</strong></p>
+            <hr style="border: 1px solid #eee; margin: 20px 0;">
+        </div>
+    `;
+
+    // Створюємо копію таблиці без колонки "Дії"
+    const printContainer = document.createElement('div');
+    printContainer.innerHTML = reportHeader + element.innerHTML;
+    
+    // Видаляємо останню колонку (Дії) з кожного рядка для чистого звіту
+    const actionsHeader = printContainer.querySelector('th:last-child');
+    if (actionsHeader) actionsHeader.remove();
+    
+    const actionCells = printContainer.querySelectorAll('td:last-child');
+    actionCells.forEach(cell => cell.remove());
+
+    // Налаштування PDF
+    const opt = {
+        margin:       10,
+        filename:     `Report_Attendance_${dateFrom}_${dateTo}.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
+    };
+
+    showNotification('Генерація PDF зачекайте...', 'info');
+    
+    try {
+        await html2pdf().set(opt).from(printContainer).save();
+        showNotification('Звіт успішно завантажено', 'success');
+    } catch (err) {
+        console.error('PDF Export error:', err);
+        showNotification('Помилка при створенні PDF', 'error');
     }
 }
