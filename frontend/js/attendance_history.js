@@ -104,9 +104,11 @@ function renderHistoryTable(records) {
         const studentName = r.student_first_name && r.student_last_name ? `${r.student_first_name} ${r.student_last_name}` : `ID: ${r.student_id}`;
         
         const priceItem = allPrices.find(p => String(p.id) === String(r.payment_choice));
-        // Рахуємо суму: якщо оплачено і це не абонемент (або ми хочемо бачити номінальний прибуток)
-        // Для звіту зазвичай цікаво бачити вартість заняття
-        const rowAmount = (r.is_paid && priceItem) ? parseFloat(priceItem.price) : 0;
+        
+        // Рахуємо прибуток лише для разових (single) та індивідуальних занять.
+        // Абонементи не щитаємо, бо оплата за них проходить окремо в розділі абонементів.
+        const isSingleOrIndividual = priceItem && (priceItem.category === 'single' || priceItem.category === 'individual');
+        const rowAmount = (r.is_paid && isSingleOrIndividual) ? parseFloat(priceItem.price) : 0;
         if (r.status === 'present') totalProfit += rowAmount;
 
         // Пріоритет: дані з запису історії -> дані з поточних налаштувань учня -> "Невідомо"
@@ -154,7 +156,7 @@ function renderHistoryTable(records) {
         footer.classList.remove('hidden');
         footer.innerHTML = `
             <tr style="background: #f3f4f6; font-weight: bold;">
-                <td colspan="4" class="text-right">Всього за період (присутні):</td>
+                <td colspan="4" class="text-right">Прибуток (разові та інд.):</td>
                 <td>${records.filter(r => r.status === 'present').length} відв.</td>
                 <td colspan="2" class="text-success" style="font-size: 1.1rem;">${totalProfit.toFixed(2)} ₴</td>
             </tr>
@@ -260,6 +262,10 @@ async function exportToPDF() {
 
     // Створюємо копію таблиці без колонки "Дії"
     const printContainer = document.createElement('div');
+    // Додаємо контейнер з фіксованою шириною для коректного рендерингу таблиці
+    printContainer.style.width = '1000px'; 
+    printContainer.style.padding = '20px';
+    printContainer.style.backgroundColor = 'white';
     printContainer.innerHTML = reportHeader + element.innerHTML;
     
     // Видаляємо останню колонку (Дії) з кожного рядка для чистого звіту
@@ -269,12 +275,20 @@ async function exportToPDF() {
     const actionCells = printContainer.querySelectorAll('td:last-child');
     actionCells.forEach(cell => cell.remove());
 
+    // Примусово показуємо футер, якщо він прихований
+    const tfooter = printContainer.querySelector('tfoot');
+    if (tfooter) tfooter.classList.remove('hidden');
+
     // Налаштування PDF
     const opt = {
-        margin:       10,
+        margin:       [10, 5, 10, 5],
         filename:     `Report_Attendance_${dateFrom}_${dateTo}.pdf`,
         image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true },
+        html2canvas:  { 
+            scale: 2, 
+            useCORS: true,
+            width: 1000 // Ширина канвасу відповідає ширині контейнера
+        },
         jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
     };
 
