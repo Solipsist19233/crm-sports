@@ -9,15 +9,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from app.core.config import settings
-from app.core.database import engine, Base
+from app.core.database import engine, Base, SessionLocal
 from app.api import auth, students, attendance, prices, payments, stats, groups, trainers, users, assignments, subscriptions
+from sqlalchemy import text
 
 # Створення таблиць та ініціалізація БД
 print("Initializing database...")
 Base.metadata.create_all(bind=engine)
 
 # Автоматична ініціалізація адміна при старті
-from app.core.database import SessionLocal
 from app.core.security import get_password_hash
 from app.models.models import User
 
@@ -37,7 +37,7 @@ try:
         db.add(admin)
         db.commit()
         print("Default admin created: username='admin', password='admin123'")
-    
+
     # Додаємо group_id та trainer_id в attendance для збереження історії
     for column in [("group_id", "INTEGER"), ("trainer_id", "INTEGER")]:
         try:
@@ -46,9 +46,6 @@ try:
             print(f"Column {column[0]} added to attendance")
         except Exception:
             db.rollback()
-
-    else:
-        print("Database already initialized")
 except Exception as e:
     print(f"Error during initialization: {e}")
     db.rollback()

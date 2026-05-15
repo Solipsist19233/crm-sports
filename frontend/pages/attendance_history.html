@@ -80,40 +80,40 @@
                 </div>
             </header>
 
-        <main class="content-body">
+            <div class="content-body" style="padding: 20px;">
             <!-- Filters Section -->
             <div class="table-card" style="margin-bottom: 20px; padding: 20px;">
                 <div class="filters-section" style="display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-end;">
-                <div class="filter-group">
-                    <label>З дати</label>
-                    <input type="date" id="dateFromFilter" class="filter-input">
-                </div>
-                <div class="filter-group">
-                    <label>По дату</label>
-                    <input type="date" id="dateToFilter" class="filter-input">
-                </div>
-                <div class="filter-group">
-                    <label>Учень</label>
-                    <input type="text" id="studentSearchInput" list="studentsDatalist" placeholder="Прізвище..." class="filter-input">
-                    <datalist id="studentsDatalist"></datalist>
-                </div>
-                <div class="filter-group">
-                    <label>Тренер</label>
-                    <select id="trainerFilter" class="filter-select">
-                        <option value="">Всі тренери</option>
-                    </select>
-                </div>
-                <div class="filter-group" style="display: flex; gap: 8px;">
-                    <button class="btn btn-primary" id="applyFiltersBtn"><i class="fas fa-filter"></i> <span>Фільтр</span></button>
-                    <button class="btn btn-secondary" id="resetFiltersBtn"><i class="fas fa-redo"></i></button>
-                    <button class="btn btn-outline-danger" id="cleanupHistoryBtn" title="Очистити стару історію"><i class="fas fa-broom"></i></button>
-                </div>
+                    <div class="filter-group" style="flex: 1; min-width: 150px;">
+                        <label>З дати</label>
+                        <input type="date" id="dateFromFilter" class="filter-input">
+                    </div>
+                    <div class="filter-group" style="flex: 1; min-width: 150px;">
+                        <label>По дату</label>
+                        <input type="date" id="dateToFilter" class="filter-input">
+                    </div>
+                    <div class="filter-group" style="flex: 2; min-width: 200px;">
+                        <label>Учень</label>
+                        <input type="text" id="studentSearchInput" list="studentsDatalist" placeholder="Прізвище..." class="filter-input">
+                        <datalist id="studentsDatalist"></datalist>
+                    </div>
+                    <div class="filter-group" style="flex: 1; min-width: 150px;">
+                        <label>Тренер</label>
+                        <select id="trainerFilter" class="filter-select">
+                            <option value="">Всі тренери</option>
+                        </select>
+                    </div>
+                    <div class="filter-group" style="display: flex; gap: 8px; flex-shrink: 0;">
+                        <button class="btn btn-primary" id="applyFiltersBtn" title="Застосувати"><i class="fas fa-filter"></i></button>
+                        <button class="btn btn-secondary" id="resetFiltersBtn" title="Скинути"><i class="fas fa-redo"></i></button>
+                        <button class="btn btn-outline-danger" id="cleanupHistoryBtn" title="Очистити стару історію"><i class="fas fa-broom"></i></button>
+                    </div>
                 </div>
             </div>
 
             <!-- Table Section -->
             <div class="table-card">
-                <div class="table-container">
+                <div class="table-container" style="overflow-x: auto;">
                 <table class="data-table">
                     <thead>
                         <tr>

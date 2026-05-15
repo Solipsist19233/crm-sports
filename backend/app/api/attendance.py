@@ -43,15 +43,29 @@ async def get_attendance_history(
     if student_id:
         query = query.filter(Attendance.student_id == student_id)
     if trainer_id:
-        query = query.filter(or_(Student.trainer_id == trainer_id, Group.trainer_id == trainer_id))
+        query = query.filter(Attendance.trainer_id == trainer_id)
 
     # Якщо залогінений тренер, фільтруємо лише його записи
     if current_user.role == "trainer" and current_user.trainer:
         t_id = current_user.trainer.id
-        query = query.filter(or_(Student.trainer_id == t_id, Group.trainer_id == t_id))
+        query = query.filter(Attendance.trainer_id == t_id)
 
     results = query.order_by(Attendance.date.desc()).all()
     return [dict(r._mapping) for r in results]
+
+@router.delete("/history/cleanup", status_code=204)
+async def cleanup_history(
+    before: date = Query(..., description="Дата, до якої видаляти історію"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Видалення старих записів історії (тільки адмін)."""
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Тільки адміністратор може видаляти історію")
+    
+    db.query(Attendance).filter(Attendance.date < before).delete(synchronize_session=False)
+    db.commit()
+    return None
 
 @router.post("/finalize", status_code=200)
 async def finalize_attendance_to_history(
