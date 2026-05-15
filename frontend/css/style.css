@@ -1494,4 +1494,17 @@ body {
 .history-filters-card .filter-select {
     background-color: #f9fafb;
 }
+
+/* Адаптивність кнопок в історії */
+@media (max-width: 768px) {
+    .buttons-row {
+        justify-content: space-between !important;
+        width: 100%;
+        gap: 5px !important;
+    }
+    .buttons-row .btn {
+        flex: 1;
+        justify-content: center;
+        padding: 10px 5px !important;
+    }
 }

@@ -16,10 +16,18 @@ async function loadDashboardData() {
         // Отримуємо загальну статистику з бекенду
         const stats = await statsAPI.getDashboard();
         
+        // Отримуємо сьогоднішню дату в форматі YYYY-MM-DD
+        const today = new Date().toISOString().split('T')[0];
+        
+        // Отримуємо записи відвідувань за сьогодні через API історії для точності
+        const todayRecords = await attendanceAPI.getHistory({ date_from: today, date_to: today }) || [];
+        // Рахуємо тільки присутніх (status === 'present'), як це робить футтер в історії
+        const presentTodayCount = todayRecords.filter(r => r.status === 'present').length;
+
         // Заповнюємо картки
         document.getElementById('totalStudents').textContent = stats.total_students || 0;
         document.getElementById('activeStudents').textContent = stats.active_students || 0;
-        document.getElementById('todayAttendance').textContent = stats.today_attendance || 0;
+        document.getElementById('todayAttendance').textContent = presentTodayCount;
 
         // ВИКЛИК АПІ ДЛЯ БОРГІВ: Отримуємо кількість неоплачених занять з історії
         const debts = await attendanceAPI.getHistory({ is_paid: false });
