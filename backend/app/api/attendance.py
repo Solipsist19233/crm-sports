@@ -218,10 +218,14 @@ async def mark_attendance(
         if existing:
             # Якщо запис вже існує — оновлюємо його (upsert)
             was_paid_subscription = (_is_subscription_payment(existing.payment_choice, db) and existing.is_paid)
+            
+            # Для тренера зберігаємо існуючі значення оплати
+            is_paid_val = existing.is_paid if current_user.role == "trainer" else attendance.is_paid
+            payment_choice_val = existing.payment_choice if current_user.role == "trainer" else attendance.payment_choice
 
             existing.status = attendance.status
-            existing.payment_choice = attendance.payment_choice
-            existing.is_paid = attendance.is_paid
+            existing.payment_choice = payment_choice_val
+            existing.is_paid = is_paid_val
             existing.notes = attendance.notes
             existing.group_id = attendance.group_id
             existing.trainer_id = attendance.trainer_id
@@ -245,8 +249,14 @@ async def mark_attendance(
             return existing
 
         # Створення нової відмітки
+        attendance_data = attendance.model_dump()
+        
+        # Якщо створює тренер — примусово ставимо "не оплачено" (або за логікою бізнесу)
+        if current_user.role == "trainer":
+            attendance_data["is_paid"] = False
+
         db_attendance = Attendance(
-            **attendance.model_dump(),
+            **attendance_data,
             marked_by=current_user.id
         )
         db.add(db_attendance)
@@ -288,6 +298,12 @@ async def update_attendance_history_entry(
         raise HTTPException(status_code=404, detail="Запис не знайдено")
     
     update_data = history_update.model_dump(exclude_unset=True)
+    
+    # Забороняємо тренеру міняти оплату в історії
+    if current_user.role == "trainer":
+        update_data.pop("is_paid", None)
+        update_data.pop("payment_choice", None)
+
     for field, value in update_data.items():
         setattr(db_entry, field, value)
 
@@ -318,6 +334,12 @@ async def update_attendance(
         was_paid_subscription = (_is_subscription_payment(db_attendance.payment_choice, db) and db_attendance.is_paid)
 
         update_data = attendance_update.model_dump(exclude_unset=True)
+        
+        # Забороняємо тренеру міняти оплату
+        if current_user.role == "trainer":
+            update_data.pop("is_paid", None)
+            update_data.pop("payment_choice", None)
+
         for field, value in update_data.items():
             setattr(db_attendance, field, value)
         

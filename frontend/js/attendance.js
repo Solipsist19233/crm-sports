@@ -240,6 +240,8 @@ function closeAttendanceModal() {
 function renderStudentsForAttendanceModal() {
     const container = document.getElementById('studentsForAttendanceList');
     const confirmBtn = document.getElementById('confirmAttendanceBtn');
+    const user = getUser();
+    const isAdmin = user && user.role === 'admin';
     
     if (currentLessonStudents.length === 0) {
         container.innerHTML = '<p class="text-center" style="color: var(--text-secondary); padding: 10px;">Учнів немає</p>';
@@ -277,11 +279,11 @@ function renderStudentsForAttendanceModal() {
                                 <span class="toggle-btn"><i class="fas fa-user-check"></i> Присутній</span>
                             </label>
                             <label class="attendance-toggle">
-                                <input type="checkbox" ${s.is_paid ? 'checked' : ''} onchange="updateStudentAttendanceStatus(${s.id}, 'is_paid', this.checked)">
+                                <input type="checkbox" ${s.is_paid ? 'checked' : ''} onchange="updateStudentAttendanceStatus(${s.id}, 'is_paid', this.checked)" ${!isAdmin ? 'disabled' : ''}>
                                 <span class="toggle-btn"><i class="fas fa-money-bill-wave"></i> Оплачено</span>
                             </label>
                             <div class="payment-choice-wrapper">
-                                <select onchange="updateStudentPaymentChoice(${s.id}, this.value)" class="card-select">
+                                <select onchange="updateStudentPaymentChoice(${s.id}, this.value)" class="card-select" ${!isAdmin ? 'disabled' : ''}>
                                     <option value="subscription" ${s.payment_choice === 'subscription' ? 'selected' : ''}>Абонемент</option>
                                     ${allPrices.map(p => {
                                         const isSelected = String(s.payment_choice) === String(p.id);

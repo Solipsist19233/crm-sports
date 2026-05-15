@@ -182,6 +182,10 @@ function openEditHistoryModal(id) {
     document.getElementById('editHistoryId').value = record.id;
     document.getElementById('editStatus').value = record.status;
     document.getElementById('editIsPaid').checked = record.is_paid;
+    
+    // Блокуємо зміну оплати для тренерів
+    const user = getUser();
+    document.getElementById('editIsPaid').disabled = (user?.role !== 'admin');
 
     document.getElementById('editHistoryModal').classList.add('show');
 }
