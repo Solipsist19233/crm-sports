@@ -79,38 +79,41 @@
                     <h1>Історія відвідувань</h1>
                 </div>
             </header>
-        <main class="content-body" style="padding: 20px;">
-            <div class="filters-bar" style="display: flex; gap: 15px; flex-wrap: wrap; background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 20px; align-items: flex-end;">
+
+        <main class="content-body">
+            <!-- Filters Section -->
+            <div class="table-card" style="margin-bottom: 20px; padding: 20px;">
+                <div class="filters-section" style="display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-end;">
                 <div class="filter-group">
-                    <label for="dateFromFilter">З дати:</label>
-                    <input type="date" id="dateFromFilter">
+                    <label>З дати</label>
+                    <input type="date" id="dateFromFilter" class="filter-input">
                 </div>
                 <div class="filter-group">
-                    <label for="dateToFilter">По дату:</label>
-                    <input type="date" id="dateToFilter">
+                    <label>По дату</label>
+                    <input type="date" id="dateToFilter" class="filter-input">
                 </div>
                 <div class="filter-group">
-                    <label for="studentFilter">Учень:</label>
-                    <input type="text" id="studentSearchInput" list="studentsDatalist" placeholder="Пошук учня">
+                    <label>Учень</label>
+                    <input type="text" id="studentSearchInput" list="studentsDatalist" placeholder="Прізвище..." class="filter-input">
                     <datalist id="studentsDatalist"></datalist>
                 </div>
                 <div class="filter-group">
-                    <label for="trainerFilter">Тренер:</label>
-                    <select id="trainerFilter">
+                    <label>Тренер</label>
+                    <select id="trainerFilter" class="filter-select">
                         <option value="">Всі тренери</option>
                     </select>
                 </div>
-                <div class="filter-group">
-                    <button class="btn btn-primary" id="applyFiltersBtn"><i class="fas fa-filter"></i> Фільтр</button>
+                <div class="filter-group" style="display: flex; gap: 8px;">
+                    <button class="btn btn-primary" id="applyFiltersBtn"><i class="fas fa-filter"></i> <span>Фільтр</span></button>
                     <button class="btn btn-secondary" id="resetFiltersBtn"><i class="fas fa-redo"></i></button>
+                    <button class="btn btn-outline-danger" id="cleanupHistoryBtn" title="Очистити стару історію"><i class="fas fa-broom"></i></button>
+                </div>
                 </div>
             </div>
 
-            <div class="action-bar">
-                <button class="btn btn-danger" id="cleanupHistoryBtn"><i class="fas fa-broom"></i> Очистити стару історію</button>
-            </div>
-
-            <div class="table-responsive">
+            <!-- Table Section -->
+            <div class="table-card">
+                <div class="table-container">
                 <table class="data-table">
                     <thead>
                         <tr>
@@ -127,6 +130,7 @@
                         <!-- History records will be loaded here -->
                     </tbody>
                 </table>
+                </div>
             </div>
         </main>
     </div>

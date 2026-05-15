@@ -32,9 +32,9 @@ async def get_attendance_history(
         Group.name.label("assignment_group_name"),
         Trainer.first_name.label("assignment_trainer_first_name"),
         Trainer.last_name.label("assignment_trainer_last_name")
-    ).join(Student, Attendance.student_id == Student.id)\
-     .outerjoin(Group, Student.group_id == Group.id)\
-     .outerjoin(Trainer, or_(Student.trainer_id == Trainer.id, Group.trainer_id == Trainer.id))
+    ).outerjoin(Student, Attendance.student_id == Student.id)\
+     .outerjoin(Group, Attendance.group_id == Group.id)\
+     .outerjoin(Trainer, Attendance.trainer_id == Trainer.id)
 
     if date_from:
         query = query.filter(Attendance.date >= date_from)

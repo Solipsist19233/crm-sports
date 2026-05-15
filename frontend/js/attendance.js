@@ -443,6 +443,8 @@ async function handleConfirmAttendance() {
                 date: lessonDate,
                 status: status, 
                 notes: "", 
+                group_id: assignment.group_id || (assignment.group && assignment.group.id),
+                trainer_id: assignment.trainer_id || (assignment.trainer && assignment.trainer.id),
                 payment_choice: String(student.payment_choice),
                 is_paid: Boolean(student.is_paid)
             };

@@ -134,14 +134,6 @@ async def delete_assignment(id: int, db: Session = Depends(get_db), current_user
     
     db_item = db.query(Assignment).filter(Assignment.id == id).first()
     if db_item:
-        # Видаляємо відмітки відвідування для цієї дати та студентів цієї групи, 
-        # щоб при повторному створенні призначення не підтягувались старі статуси
-        student_ids = [s.id for s in db_item.students]
-        db.query(Attendance).filter(
-            Attendance.date == db_item.lesson_date,
-            Attendance.student_id.in_(student_ids)
-        ).delete(synchronize_session=False)
-
         db.delete(db_item)
         db.commit()
     return None
@@ -168,10 +160,6 @@ async def cleanup_assignments(
                     assignment_students.c.assignment_id.in_(ids_to_delete)
                 )
             )
-            # Видаляємо відмітки відвідування за цей період
-            db.query(Attendance).filter(
-                Attendance.date < before
-            ).delete(synchronize_session=False)
 
             # Потім видаляємо самі призначення
             db.query(Assignment).filter(Assignment.id.in_(ids_to_delete)).delete(synchronize_session=False)

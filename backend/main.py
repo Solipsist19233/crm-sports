@@ -37,6 +37,16 @@ try:
         db.add(admin)
         db.commit()
         print("Default admin created: username='admin', password='admin123'")
+    
+    # Додаємо group_id та trainer_id в attendance для збереження історії
+    for column in [("group_id", "INTEGER"), ("trainer_id", "INTEGER")]:
+        try:
+            db.execute(text(f"ALTER TABLE attendance ADD COLUMN {column[0]} {column[1]}"))
+            db.commit()
+            print(f"Column {column[0]} added to attendance")
+        except Exception:
+            db.rollback()
+
     else:
         print("Database already initialized")
 except Exception as e:
