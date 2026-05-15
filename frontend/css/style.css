@@ -859,6 +859,18 @@ body {
     padding: 20px;
 }
 
+/* Стилі для модалки редагування історії */
+.attendance-history-modal {
+    max-width: 500px !important;
+    border-radius: 16px;
+}
+
+.attendance-history-modal .form-group {
+    margin-bottom: 20px;
+    padding: 0 10px;
+}
+
+
 /* Modal */
 .modal {
     display: none;
@@ -1467,4 +1479,19 @@ body {
     display: flex;
     align-items: center;
     gap: 5px;
+}
+
+/* Покращення фільтрів в історії */
+.history-filters-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.history-filters-card .filter-input,
+.history-filters-card .filter-select {
+    background-color: #f9fafb;
+}
 }

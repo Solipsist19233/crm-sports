@@ -81,8 +81,8 @@
             </header>
 
             <div class="content-body" style="padding: 20px;">
-            <!-- Filters Section -->
-            <div class="table-card" style="margin-bottom: 20px; padding: 20px;">
+            <!-- Filters Section as a Card -->
+            <div class="history-filters-card">
                 <div class="filters-section" style="display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-end;">
                     <div class="filter-group" style="flex: 1; min-width: 150px;">
                         <label>З дати</label>
@@ -137,13 +137,15 @@
 
     <!-- Modal для редагування запису історії -->
     <div id="editHistoryModal" class="modal">
-        <div class="modal-content">
-            <span class="close-button" onclick="closeEditHistoryModal()">&times;</span>
-            <h2>Редагувати запис історії</h2>
-            <form id="editHistoryForm">
+        <div class="modal-content attendance-history-modal">
+            <div class="modal-header">
+                <h2>Редагувати історію</h2>
+                <button class="modal-close" onclick="closeEditHistoryModal()">&times;</button>
+            </div>
+            <form id="editHistoryForm" class="modal-form">
                 <input type="hidden" id="editHistoryId">
                 <div class="form-group">
-                    <label for="editStatus">Статус:</label>
+                    <label for="editStatus">Статус відвідування</label>
                     <select id="editStatus" required>
                         <option value="present">Присутній</option>
                         <option value="absent">Відсутній</option>
@@ -151,10 +153,15 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="editIsPaid">Оплачено:</label>
-                    <input type="checkbox" id="editIsPaid">
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="editIsPaid">
+                        <span>Відмітити як оплачено</span>
+                    </label>
                 </div>
-                <button type="submit" class="btn btn-primary">Зберегти</button>
+                <div class="modal-footer" style="padding: 20px 0 0 0; border-top: 1px solid var(--border-color); margin-top: 20px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeEditHistoryModal()">Скасувати</button>
+                    <button type="submit" class="btn btn-primary">Зберегти зміни</button>
+                </div>
             </form>
         </div>
     </div>
