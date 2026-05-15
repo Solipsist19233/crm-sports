@@ -102,6 +102,7 @@ class StudentBase(BaseModel):
     insurance_start: Optional[date] = None
     insurance_end: Optional[date] = None
     medical_certificate: bool = False
+    has_contract: bool = False
     notes: Optional[str] = None
 
 class StudentCreate(StudentBase):
@@ -118,6 +119,7 @@ class StudentUpdate(BaseModel):
     insurance_start: Optional[date] = None
     insurance_end: Optional[date] = None
     medical_certificate: Optional[bool] = None
+    has_contract: Optional[bool] = None
     notes: Optional[str] = None
     is_active: Optional[bool] = None
 

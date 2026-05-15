@@ -77,6 +77,7 @@ class Student(Base):
     insurance_start = Column(Date, nullable=True)
     insurance_end = Column(Date, nullable=True)
     medical_certificate = Column(Boolean, default=False)
+    has_contract = Column(Boolean, default=False)
     photo = Column(String(255))
     notes = Column(Text)
     is_active = Column(Boolean, default=True, index=True)

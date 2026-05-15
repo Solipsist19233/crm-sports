@@ -76,6 +76,10 @@ function renderStudents(students) {
                         <i class="fas ${student.medical_certificate ? 'fa-check-circle' : 'fa-times-circle'}"></i>
                         <small>Довідка: ${student.medical_certificate ? 'Є' : 'Немає'}</small>
                     </div>
+                    <div class="${student.has_contract ? 'status-success' : 'status-danger'}" title="Договір">
+                        <i class="fas ${student.has_contract ? 'fa-file-contract' : 'fa-file-signature'}"></i>
+                        <small>Договір: ${student.has_contract ? 'Є' : 'Немає'}</small>
+                    </div>
                     ${(function() {
                         const ins = getInsuranceStatus(student.insurance_end);
                         return `
@@ -167,6 +171,7 @@ function openAddStudentModal() {
     if (document.getElementById('insuranceStart')) document.getElementById('insuranceStart').value = '';
     if (document.getElementById('insuranceEnd')) document.getElementById('insuranceEnd').value = '';
     if (document.getElementById('medicalCertificate')) document.getElementById('medicalCertificate').checked = false;
+    if (document.getElementById('hasContract')) document.getElementById('hasContract').checked = false;
     document.getElementById('studentModal').classList.add('show');
 }
 
@@ -188,6 +193,7 @@ async function editStudent(id) {
         document.getElementById('insuranceStart').value = student.insurance_start || '';
         document.getElementById('insuranceEnd').value = student.insurance_end || '';
         document.getElementById('medicalCertificate').checked = student.medical_certificate || false;
+        document.getElementById('hasContract').checked = student.has_contract || false;
         document.getElementById('notes').value = student.notes || '';
 
         document.getElementById('studentModal').classList.add('show');
@@ -237,6 +243,7 @@ document.getElementById('studentForm').addEventListener('submit', async (e) => {
         insurance_start: document.getElementById('insuranceStart').value || null,
         insurance_end: document.getElementById('insuranceEnd').value || null,
         medical_certificate: document.getElementById('medicalCertificate').checked,
+        has_contract: document.getElementById('hasContract').checked,
         notes: document.getElementById('notes').value || null
     };
 

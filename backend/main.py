@@ -54,6 +54,14 @@ try:
         except Exception:
             db.rollback()
 
+    # Додаємо has_contract в students
+    try:
+        db.execute(text("ALTER TABLE students ADD COLUMN has_contract BOOLEAN DEFAULT FALSE"))
+        db.commit()
+        print("Migration: Column has_contract added to students")
+    except Exception:
+        db.rollback()
+
 except Exception as e:
     print(f"Error during initialization: {e}")
     db.rollback()
