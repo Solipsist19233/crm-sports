@@ -18,7 +18,8 @@ async def get_attendance_history(
     date_from: Optional[date] = Query(None),
     date_to: Optional[date] = Query(None),
     student_id: Optional[int] = Query(None),
-    trainer_id: Optional[int] = Query(None)
+    trainer_id: Optional[int] = Query(None),
+    is_paid: Optional[bool] = Query(None)
 ):
     """Отримання історії відвідувань з приєднанням даних про учня, групу та тренера."""
     query = db.query(
@@ -47,6 +48,8 @@ async def get_attendance_history(
         query = query.filter(Attendance.student_id == student_id)
     if trainer_id:
         query = query.filter(Attendance.trainer_id == trainer_id)
+    if is_paid is not None:
+        query = query.filter(Attendance.is_paid == is_paid)
 
     # Якщо залогінений тренер, фільтруємо лише його записи
     if current_user.role == "trainer" and current_user.trainer:

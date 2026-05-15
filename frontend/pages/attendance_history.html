@@ -103,6 +103,14 @@
                             <option value="">Всі тренери</option>
                         </select>
                     </div>
+                    <div class="filter-group" style="flex: 1; min-width: 150px;">
+                        <label>Оплата</label>
+                        <select id="paymentFilter" class="filter-select">
+                            <option value="">Всі записи</option>
+                            <option value="false">Тільки борги</option>
+                            <option value="true">Оплачено</option>
+                        </select>
+                    </div>
                     <div class="filter-group" style="display: flex; gap: 8px; flex-shrink: 0;">
                         <button class="btn btn-primary" id="applyFiltersBtn" title="Застосувати"><i class="fas fa-filter"></i></button>
                         <button class="btn btn-secondary" id="resetFiltersBtn" title="Скинути"><i class="fas fa-redo"></i></button>

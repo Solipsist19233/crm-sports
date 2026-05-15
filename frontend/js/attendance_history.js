@@ -62,6 +62,7 @@ async function loadHistoryRecords() {
     const dateTo = document.getElementById('dateToFilter').value;
     const studentSearchValue = document.getElementById('studentSearchInput').value;
     const trainerId = document.getElementById('trainerFilter').value;
+    const isPaid = document.getElementById('paymentFilter').value;
 
     let studentId = null;
     if (studentSearchValue) {
@@ -74,6 +75,7 @@ async function loadHistoryRecords() {
     if (dateTo) params.date_to = dateTo;
     if (studentId) params.student_id = studentId;
     if (trainerId) params.trainer_id = trainerId;
+    if (isPaid !== "") params.is_paid = isPaid === "true";
 
     try {
         allHistoryRecords = await attendanceAPI.getHistory(params) || [];
@@ -142,6 +144,7 @@ function resetFilters() {
     document.getElementById('dateToFilter').value = '';
     document.getElementById('studentSearchInput').value = '';
     document.getElementById('trainerFilter').value = '';
+    document.getElementById('paymentFilter').value = '';
     loadHistoryRecords();
 }
 
