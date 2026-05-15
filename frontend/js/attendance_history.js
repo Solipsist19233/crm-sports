@@ -96,6 +96,7 @@ function renderHistoryTable(records) {
         const trainerName = r.assignment_trainer_first_name && r.assignment_trainer_last_name ? `${r.assignment_trainer_first_name} ${r.assignment_trainer_last_name}` : 'Невідомий';
         const groupName = r.assignment_group_name || 'Невідома група';
         const paymentText = allPrices.find(p => String(p.id) === String(r.payment_choice))?.name || 'Абонемент';
+        const paidClass = r.is_paid ? 'badge-success' : 'badge-danger';
 
         return `
             <tr>
@@ -109,7 +110,7 @@ function renderHistoryTable(records) {
                     </span>
                 </td>
                 <td>
-                    <span class="badge ${r.is_paid ? 'badge-success' : 'badge-warning'}">
+                    <span class="badge ${paidClass}">
                         ${paymentText} (${r.is_paid ? 'Оплачено' : 'Не оплачено'})
                     </span>
                 </td>

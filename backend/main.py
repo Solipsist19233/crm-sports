@@ -9,15 +9,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from app.core.config import settings
-from app.core.database import engine, Base, SessionLocal
+from app.core.database import engine, Base
 from app.api import auth, students, attendance, prices, payments, stats, groups, trainers, users, assignments, subscriptions
-from sqlalchemy import text
 
 # Створення таблиць та ініціалізація БД
 print("Initializing database...")
 Base.metadata.create_all(bind=engine)
 
 # Автоматична ініціалізація адміна при старті
+from app.core.database import SessionLocal
 from app.core.security import get_password_hash
 from app.models.models import User
 
@@ -38,14 +38,22 @@ try:
         db.commit()
         print("Default admin created: username='admin', password='admin123'")
 
-    # Додаємо group_id та trainer_id в attendance для збереження історії
-    for column in [("group_id", "INTEGER"), ("trainer_id", "INTEGER")]:
+    # Гарантуємо наявність всіх колонок в таблиці відвідувань для стабільної роботи історії
+    required_columns = [
+        ("group_id", "INTEGER"),
+        ("trainer_id", "INTEGER"),
+        ("is_paid", "BOOLEAN"),
+        ("payment_choice", "VARCHAR")
+    ]
+    for col_name, col_type in required_columns:
         try:
-            db.execute(text(f"ALTER TABLE attendance ADD COLUMN {column[0]} {column[1]}"))
+            # Використовуємо EXECUTE для перевірки/додавання
+            db.execute(text(f"ALTER TABLE attendance ADD COLUMN {col_name} {col_type}"))
             db.commit()
-            print(f"Column {column[0]} added to attendance")
+            print(f"Migration: Column {col_name} successfully added.")
         except Exception:
             db.rollback()
+
 except Exception as e:
     print(f"Error during initialization: {e}")
     db.rollback()

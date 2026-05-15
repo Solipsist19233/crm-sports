@@ -184,7 +184,7 @@ function renderAssignmentsCards(assignments) {
                 <div class="group-actions">
                     <button class="btn ${isCompleted ? 'btn-secondary' : 'btn-primary'} btn-sm" onclick="openMarkAttendanceModal(${a.id})">
                         <i class="fas ${isCompleted ? 'fa-edit' : 'fa-clipboard-check'}"></i> 
-                        ${isCompleted ? 'Редагувати' : 'Відмітити'}
+                        ${isCompleted ? 'Редагувати' : 'Зберегти'}
                     </button>
                 </div>
             </div>
@@ -328,23 +328,17 @@ function updateConfirmButtonState() {
     const messageEl = document.getElementById('attendanceValidationMsg');
     if (!confirmBtn || !messageEl) return;
 
-    // Тепер перевіряємо оплату для ВСІХ, бо абонемент має списатися навіть при відсутності
     const unpaidCount = currentLessonStudents.filter(s => !s.is_paid).length;
     const hasStudents = currentLessonStudents.length > 0;
-    const isReady = unpaidCount === 0 && hasStudents;
-
-    if (isReady) {
-        confirmBtn.disabled = false;
-        confirmBtn.classList.add('btn-success');
-        messageEl.innerHTML = '';
+    
+    // Дозволяємо зберігати завжди, якщо є хоча б один учень в списку
+    confirmBtn.disabled = !hasStudents;
+    confirmBtn.classList.toggle('btn-success', hasStudents);
+    
+    if (hasStudents && unpaidCount > 0) {
+        messageEl.innerHTML = `<i class="fas fa-info-circle"></i> Є неоплачені (${unpaidCount})`;
     } else {
-        confirmBtn.disabled = true;
-        confirmBtn.classList.remove('btn-success');
-        if (hasStudents && unpaidCount > 0) {
-            messageEl.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Не оплачено: ${unpaidCount}`;
-        } else {
-            messageEl.innerHTML = '';
-        }
+        messageEl.innerHTML = '';
     }
 }
 
@@ -443,8 +437,8 @@ async function handleConfirmAttendance() {
                 date: lessonDate,
                 status: status, 
                 notes: "", 
-                group_id: assignment.group_id || (assignment.group && assignment.group.id),
-                trainer_id: assignment.trainer_id || (assignment.trainer && assignment.trainer.id),
+                group_id: assignment.group_id || assignment.group?.id,
+                trainer_id: assignment.trainer_id || assignment.trainer?.id,
                 payment_choice: String(student.payment_choice),
                 is_paid: Boolean(student.is_paid)
             };
