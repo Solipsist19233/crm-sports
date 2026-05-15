@@ -226,6 +226,8 @@ async def mark_attendance(
             existing.payment_choice = attendance.payment_choice
             existing.is_paid = attendance.is_paid
             existing.notes = attendance.notes
+            existing.group_id = attendance.group_id
+            existing.trainer_id = attendance.trainer_id
             existing.marked_by = current_user.id
 
             # Списання ТІЛЬКИ якщо вибрано абонемент І стоїть галочка Оплачено
@@ -328,6 +330,8 @@ async def update_attendance(
         update_data = attendance_update.model_dump(exclude_unset=True)
         for field, value in update_data.items():
             setattr(db_attendance, field, value)
+        
+        db.flush() # Гарантуємо, що зміни застосовані для перевірки нижче
 
         is_now_subscription = _is_subscription_payment(db_attendance.payment_choice, db)
 

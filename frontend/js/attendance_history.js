@@ -92,9 +92,18 @@ function renderHistoryTable(records) {
     }
 
     tbody.innerHTML = records.map(r => {
+        // Отримуємо дані учня для запасного варіанту
+        const student = allStudents.find(s => s.id === r.student_id);
+        
         const studentName = r.student_first_name && r.student_last_name ? `${r.student_first_name} ${r.student_last_name}` : `ID: ${r.student_id}`;
-        const trainerName = r.assignment_trainer_first_name && r.assignment_trainer_last_name ? `${r.assignment_trainer_first_name} ${r.assignment_trainer_last_name}` : 'Невідомий';
-        const groupName = r.assignment_group_name || 'Невідома група';
+        
+        // Пріоритет: дані з запису історії -> дані з поточних налаштувань учня -> "Невідомо"
+        const trainerName = r.assignment_trainer_first_name && r.assignment_trainer_last_name 
+            ? `${r.assignment_trainer_first_name} ${r.assignment_trainer_last_name}` 
+            : (student?.trainer ? `${student.trainer.first_name} ${student.trainer.last_name}` : 'Невідомий');
+            
+        const groupName = r.assignment_group_name || student?.group?.name || 'Невідома група';
+        
         const paymentText = allPrices.find(p => String(p.id) === String(r.payment_choice))?.name || 'Абонемент';
         const paidClass = r.is_paid ? 'badge-success' : 'badge-danger';
 
