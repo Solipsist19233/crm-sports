@@ -250,6 +250,28 @@ const attendanceAPI = {
         return await apiRequest(`/api/attendance/${id}`, {
             method: 'DELETE'
         });
+    },
+    async finalize(data) {
+        return await apiRequest('/api/attendance/finalize', {
+            method: 'POST',
+            body: JSON.stringify(data)
+        });
+    },
+    async getHistory(params = {}) {
+        const searchParams = new URLSearchParams(params).toString();
+        const endpoint = searchParams ? `/api/attendance/history?${searchParams}` : '/api/attendance/history';
+        return await apiRequest(endpoint);
+    },
+    async updateHistoryEntry(id, data) {
+        return await apiRequest(`/api/attendance/history/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(data)
+        });
+    },
+    async cleanupHistory(dateBefore) {
+        return await apiRequest(`/api/attendance/history/cleanup?before=${dateBefore}`, {
+            method: 'DELETE'
+        });
     }
 };
 

@@ -448,7 +448,7 @@ async function handleConfirmAttendance() {
             };
 
             // Оскільки оплата тепер обов'язкова для всіх у списку, 
-            // ми створюємо або оновлюємо запис для кожного
+            // ми створюємо або оновлюємо запис для кожного в поточній таблиці Attendance
             if (student.attendance_id) {
                 // Update existing attendance record
                 await attendanceAPI.update(student.attendance_id, attendanceData);
@@ -457,6 +457,37 @@ async function handleConfirmAttendance() {
                 await attendanceAPI.mark(attendanceData);
             }
         }
+
+        // Після успішного збереження поточних відміток, "фіналізуємо" їх в історію
+        // Це відповідає логіці "записать іде в історію"
+        const historyEntries = currentLessonStudents.map(student => {
+            const sId = parseInt(student.id);
+            let status = 'absent';
+            if (student.is_present) status = 'present';
+
+            return {
+                assignment_id: currentAssignmentId,
+                student_id: sId,
+                date: lessonDate,
+                status: status,
+                payment_choice: String(student.payment_choice),
+                is_paid: Boolean(student.is_paid),
+                notes: "" // Можна додати нотатки, якщо є
+            };
+        });
+
+        if (historyEntries.length > 0) {
+            try {
+                await attendanceAPI.finalize(historyEntries);
+                showNotification('Відмітки успішно записано в історію!', 'success');
+            } catch (historyError) {
+                console.error('Помилка запису в історію:', historyError);
+                showNotification('Помилка запису відвідування в історію: ' + (historyError.message || 'Невідома помилка'), 'error');
+                // Можливо, тут варто вирішити, чи вважати це критичною помилкою, якщо поточні відмітки збереглись, а в історію - ні.
+                // Для початку, просто покажемо повідомлення.
+            }
+        }
+
         showNotification('Відвідування успішно оновлено!', 'success');
         closeAttendanceModal();
         await loadAssignmentsForDate(lessonDate); // Reload assignments to reflect changes
