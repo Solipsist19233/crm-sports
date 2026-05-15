@@ -209,6 +209,26 @@ async def mark_attendance(
         print(f"Error marking attendance: {e}")
         raise HTTPException(status_code=500, detail=f"Помилка збереження відвідування: {str(e)}")
 
+@router.put("/history/{history_id}", response_model=AttendanceResponse)
+async def update_attendance_history_entry(
+    history_id: int,
+    history_update: AttendanceUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Редагування запису безпосередньо з таблиці історії."""
+    db_entry = db.query(Attendance).filter(Attendance.id == history_id).first()
+    if not db_entry:
+        raise HTTPException(status_code=404, detail="Запис не знайдено")
+    
+    update_data = history_update.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(db_entry, field, value)
+
+    db.commit()
+    db.refresh(db_entry)
+    return db_entry
+
 @router.put("/{attendance_id}", response_model=AttendanceResponse)
 async def update_attendance(
     attendance_id: int,
