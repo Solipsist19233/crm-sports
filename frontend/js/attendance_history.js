@@ -24,6 +24,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         window.openEditHistoryModal = openEditHistoryModal;
         window.closeEditHistoryModal = closeEditHistoryModal;
+        window.deleteHistoryEntry = deleteHistoryEntry;
     } catch (err) {
         console.error('Помилка ініціалізації сторінки історії відвідувань:', err);
         showNotification('Помилка завантаження сторінки історії', 'error');
@@ -127,6 +128,9 @@ function renderHistoryTable(records) {
                     <button class="btn-icon" onclick="openEditHistoryModal(${r.id})" title="Редагувати">
                         <i class="fas fa-edit"></i>
                     </button>
+                    <button class="btn-icon btn-danger" onclick="deleteHistoryEntry(${r.id})" title="Видалити">
+                        <i class="fas fa-trash"></i>
+                    </button>
                 </td>
             </tr>
         `;
@@ -178,6 +182,19 @@ document.getElementById('editHistoryForm').addEventListener('submit', async (e) 
         showNotification('Помилка оновлення запису історії: ' + (error.message || 'Невідома помилка'), 'error');
     }
 });
+
+async function deleteHistoryEntry(id) {
+    if (!confirm('Ви впевнені, що хочете видалити цей запис з історії?')) return;
+
+    try {
+        await attendanceAPI.delete(id);
+        showNotification('Запис успішно видалено', 'success');
+        await loadHistoryRecords();
+    } catch (error) {
+        console.error('Помилка видалення запису історії:', error);
+        showNotification('Помилка видалення: ' + (error.message || 'Невідома помилка'), 'error');
+    }
+}
 
 async function cleanupOldHistory() {
     const threeMonthsAgo = new Date();

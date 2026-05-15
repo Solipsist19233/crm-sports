@@ -145,6 +145,8 @@ class AttendanceBase(BaseModel):
     student_id: int
     date: date
     status: str = Field(..., pattern="^(present|absent|sick|excused)$")
+    group_id: Optional[int] = None
+    trainer_id: Optional[int] = None
     payment_choice: Optional[str] = None
     is_paid: bool = False
     notes: Optional[str] = None
@@ -155,6 +157,8 @@ class AttendanceCreate(AttendanceBase):
 class AttendanceUpdate(BaseModel):
     payment_choice: Optional[str] = None
     is_paid: Optional[bool] = None
+    group_id: Optional[int] = None
+    trainer_id: Optional[int] = None
     status: Optional[str] = Field(None, pattern="^(present|absent|sick|excused)$")
     notes: Optional[str] = None
 
