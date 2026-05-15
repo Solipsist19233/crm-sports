@@ -107,10 +107,15 @@ async function apiRequest(endpoint, options = {}) {
         headers['Authorization'] = `Bearer ${token}`;
     }
 
-    // Уникаємо проблем з Mixed Content на Railway
-    // Якщо endpoint починається з /, fetch зробить запит відносно поточного домену і протоколу (HTTPS)
-    let url = API_BASE_URL ? `${API_BASE_URL}${endpoint}` : endpoint;
-    if (!API_BASE_URL && !url.startsWith('/')) url = '/' + url;
+    // ПОВНЕ ВИПРАВЛЕННЯ Mixed Content:
+    // Використовуємо лише відносний шлях, якщо API_BASE_URL порожній.
+    // Також прибираємо можливий подвійний слеш.
+    let url = endpoint;
+    if (API_BASE_URL) {
+        url = `${API_BASE_URL}${endpoint}`;
+    } else if (!endpoint.startsWith('/')) {
+        url = '/' + endpoint;
+    }
 
     try {
         const response = await fetch(url, {
