@@ -202,16 +202,9 @@ async def mark_attendance(
         raise HTTPException(status_code=404, detail="Student not found")
 
     # Перевірка доступу для тренера
-    if current_user.role == "trainer" and current_user.trainer:
-        trainer_id = current_user.trainer.id
-        is_own_student = db.query(Student).filter(
-            Student.id == attendance.student_id,
-            or_(
-                Student.trainer_id == trainer_id,
-                Student.group.has(Group.trainer_id == trainer_id)
-            )
-        ).first()
-        if not is_own_student:
+    if current_user.role == "trainer":
+        # Тренер може відмічати відвідування лише для занять, де він є тренером
+        if not current_user.trainer or attendance.trainer_id != current_user.trainer.id:
             raise HTTPException(status_code=403, detail="Access denied")
 
     try:
@@ -316,16 +309,9 @@ async def update_attendance(
         raise HTTPException(status_code=404, detail="Attendance not found")
 
     # Перевірка доступу для тренера
-    if current_user.role == "trainer" and current_user.trainer:
-        trainer_id = current_user.trainer.id
-        is_own_student = db.query(Student).filter(
-            Student.id == db_attendance.student_id,
-            or_(
-                Student.trainer_id == trainer_id,
-                Student.group.has(Group.trainer_id == trainer_id)
-            )
-        ).first()
-        if not is_own_student:
+    if current_user.role == "trainer":
+        # Тренер може оновлювати відмітки лише для занять, де він є тренером
+        if not current_user.trainer or db_attendance.trainer_id != current_user.trainer.id:
             raise HTTPException(status_code=403, detail="Access denied")
 
     try:
