@@ -315,12 +315,12 @@ async function deleteAssignment(id) {
 }
 
 async function deleteOldAssignments() {
-    // Беремо сьогоднішню дату. Все, що < сьогодні = до вчора включно.
+    // Беремо вчорашню дату. Все, що < вчора = до позавчора включно.
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1); // Встановлюємо дату на вчора
     const yesterdayStr = yesterday.toISOString().split('T')[0];
     
-    if (confirm(`Видалити ВСІ призначення до вчора (${formatDate(yesterdayStr)})? Цю дію неможливо скасувати!`)) {
+    if (confirm(`Видалити ВСІ призначення, створені РАНІШЕ ніж вчора (${formatDate(yesterdayStr)})? Цю дію неможливо скасувати!`)) {
         try {
             setBtnLoading('deleteOldBtn', true); 
             await assignmentsAPI.cleanup(yesterdayStr);

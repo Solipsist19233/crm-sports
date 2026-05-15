@@ -146,7 +146,7 @@ async def delete_assignment(id: int, db: Session = Depends(get_db), current_user
         db.commit()
     return None
 
-@router.delete("/cleanup", status_code=204)
+@router.delete("", status_code=204)
 async def cleanup_assignments(
     before: date = Query(..., description="Дата, до якої видаляти призначення"),
     db: Session = Depends(get_db),
