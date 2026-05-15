@@ -1,101 +1,72 @@
-// Dashboard Page Logic
-
 document.addEventListener('DOMContentLoaded', async () => {
     try {
         requireAuth();
         loadUserInfo();
-        setCurrentDate();
-        
         setupMobileMenu();
 
-        const results = await Promise.allSettled([
-            loadDashboardStats(),
-            loadAttendanceStats()
-        ]);
-        
-        if (results[0].status === 'rejected') {
-            console.error('Статистику не вдалося завантажити:', results[0].reason);
-        }
+        await loadDashboardData();
+        await loadAttendanceStats();
     } catch (err) {
-        console.error('Помилка дашборду:', err);
+        console.error('Помилка завантаження дашборду:', err);
     }
 });
 
-function setCurrentDate() {
-    const options = {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    };
-    const dateStr = new Date().toLocaleDateString('uk-UA', options);
-    const dateEl = document.getElementById('currentDate');
-    if (dateEl) dateEl.textContent = dateStr;
-}
-
-async function loadDashboardStats() {
+async function loadDashboardData() {
     try {
+        // Отримуємо загальну статистику з бекенду
         const stats = await statsAPI.getDashboard();
+        
+        // Заповнюємо картки
+        document.getElementById('totalStudents').textContent = stats.total_students || 0;
+        document.getElementById('activeStudents').textContent = stats.active_students || 0;
+        document.getElementById('todayAttendance').textContent = stats.today_attendance || 0;
 
-        // Оновлюємо картки статистики тільки якщо елементи існують
-        const updateEl = (id, val) => {
-            const el = document.getElementById(id);
-            if (el) el.textContent = val !== undefined ? val : 0;
-        };
-
-        updateEl('totalStudents', stats.total_students);
-        updateEl('activeStudents', stats.active_students);
-        updateEl('todayAttendance', stats.today_attendance);
-        const expSubsEl = document.getElementById('expiringSubscriptions');
-        if (expSubsEl && stats.expiring_subscriptions > 0) {
-            expSubsEl.style.display = 'flex';
-            const countEl = document.getElementById('expiringSubs');
-            if (countEl) countEl.textContent = stats.expiring_subscriptions;
+        // ВИКЛИК АПІ ДЛЯ БОРГІВ: Отримуємо кількість неоплачених занять з історії
+        const debts = await attendanceAPI.getHistory({ is_paid: false });
+        const debtCount = Array.isArray(debts) ? debts.length : 0;
+        
+        const debtsEl = document.getElementById('totalDebts');
+        if (debtsEl) {
+            debtsEl.textContent = debtCount;
+            // Якщо є борги — робимо цифру червоною
+            if (debtCount > 0) debtsEl.style.color = 'var(--danger-color)';
         }
 
-        const expiredIns = stats.expired_insurance || 0;
-        const expiringIns = stats.expiring_insurance || 0;
-
-        const insAlert = document.getElementById('expiringInsurance');
-        if (insAlert && (expiredIns > 0 || expiringIns > 0)) {
-            insAlert.style.display = 'flex';
-            const insTextEl = document.getElementById('expiringIns');
-            if (insTextEl) insTextEl.innerHTML = 
-                `Відсутня/Прострочена: <strong class="text-danger">${expiredIns}</strong>, закінчуються: <strong class="text-warning">${expiringIns}</strong>`;
+        // Сповіщення про абонементи та страховки
+        if (stats.expiring_subscriptions > 0) {
+            document.getElementById('expiringSubscriptions').style.display = 'flex';
+            document.getElementById('expiringSubs').textContent = stats.expiring_subscriptions;
+        }
+        if (stats.expiring_insurance > 0) {
+            document.getElementById('expiringInsurance').style.display = 'flex';
+            document.getElementById('expiringIns').textContent = stats.expiring_insurance;
         }
     } catch (error) {
-        console.error('Error loading dashboard stats:', error);
-        showNotification('Помилка завантаження статистики', 'error');
+        console.error('Помилка статистики:', error);
     }
 }
 
 async function loadAttendanceStats() {
+    const tbody = document.getElementById('attendanceStatsTable');
     try {
         const stats = await statsAPI.getAttendance(10);
-        const tbody = document.getElementById('attendanceStatsTable');
-
-        if (stats.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" class="text-center">Немає даних</td></tr>';
+        if (!stats || stats.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center">Немає даних для статистики</td></tr>';
             return;
         }
 
         tbody.innerHTML = stats.map(s => `
             <tr>
-                <td>${s.first_name} ${s.last_name}</td>
-                <td>${s.total_present}</td>
-                <td>${s.total_absent}</td>
-                <td>${s.total_sick}</td>
+                <td><strong>${s.first_name} ${s.last_name}</strong></td>
+                <td class="text-success">${s.total_present}</td>
+                <td class="text-danger">${s.total_absent}</td>
+                <td class="text-warning">${s.total_sick}</td>
                 <td>${s.total_classes}</td>
-                <td>
-                    <span style="color: ${s.attendance_rate >= 80 ? 'var(--secondary-color)' : s.attendance_rate >= 60 ? 'var(--warning-color)' : 'var(--danger-color)'}">
-                        ${s.attendance_rate}%
-                    </span>
-                </td>
+                <td><div class="badge badge-info">${s.attendance_rate}%</div></td>
             </tr>
         `).join('');
     } catch (error) {
-        console.error('Error loading attendance stats:', error);
-        document.getElementById('attendanceStatsTable').innerHTML =
-            '<tr><td colspan="6" class="text-center">Помилка завантаження даних</td></tr>';
+        console.error('Помилка завантаження статистики:', error);
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center text-danger">Помилка завантаження</td></tr>';
     }
 }

@@ -451,11 +451,17 @@ const trainersAPI = {
 // Show users menu for admin
 function showAdminMenu() {
     const user = getUser();
-    if (!user || user.role !== 'admin') return;
+    if (!user) return;
+
+    // Історія має бути видима ВСІМ (і адмінам, і тренерам)
+    const historyLink = document.getElementById('historyLink');
+    if (historyLink) historyLink.style.display = 'flex';
 
     // Список ID посилань, які мають бачити тільки адміни
     const adminLinks = ['usersLink', 'assignmentsLink', 'pricesLink'];
     
+    if (user.role !== 'admin') return;
+
     adminLinks.forEach(id => {
         const link = document.getElementById(id);
         if (link) {
