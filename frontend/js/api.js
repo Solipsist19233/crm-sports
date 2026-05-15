@@ -107,7 +107,8 @@ async function apiRequest(endpoint, options = {}) {
         headers['Authorization'] = `Bearer ${token}`;
     }
 
-    const url = `${API_BASE_URL}${endpoint}`;
+    // Якщо API_BASE_URL порожній, використовуємо відносний шлях, що автоматично підхопить HTTPS
+    const url = API_BASE_URL ? `${API_BASE_URL}${endpoint}` : endpoint;
 
     try {
         const response = await fetch(url, {
