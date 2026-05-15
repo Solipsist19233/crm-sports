@@ -341,7 +341,7 @@ const assignmentsAPI = {
         });
     },
     async cleanup(dateBefore) {
-        return await apiRequest(`/api/assignments/cleanup?before=${dateBefore}`, {
+        return await apiRequest(`/api/assignments?before=${dateBefore}`, {
             method: 'DELETE'
         });
     }
