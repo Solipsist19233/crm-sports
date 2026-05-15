@@ -100,6 +100,8 @@ class Attendance(Base):
     student_id = Column(Integer, ForeignKey("students.id", ondelete="CASCADE"), nullable=False, index=True)
     date = Column(Date, nullable=False, index=True)
     status = Column(String(20), nullable=False)
+    group_id = Column(Integer, ForeignKey("groups.id", ondelete="SET NULL"), nullable=True)
+    trainer_id = Column(Integer, ForeignKey("trainers.id", ondelete="SET NULL"), nullable=True)
     payment_choice = Column(String(50))
     is_paid = Column(Boolean, default=False)
     notes = Column(Text)

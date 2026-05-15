@@ -184,7 +184,7 @@ function renderAssignmentsCards(assignments) {
                 <div class="group-actions">
                     <button class="btn ${isCompleted ? 'btn-secondary' : 'btn-primary'} btn-sm" onclick="openMarkAttendanceModal(${a.id})">
                         <i class="fas ${isCompleted ? 'fa-edit' : 'fa-clipboard-check'}"></i> 
-                        ${isCompleted ? 'Редагувати' : 'Зберегти'}
+                        ${isCompleted ? 'Редагувати' : 'Підтвердити'}
                     </button>
                 </div>
             </div>
@@ -336,7 +336,7 @@ function updateConfirmButtonState() {
     confirmBtn.classList.toggle('btn-success', hasStudents);
     
     if (hasStudents && unpaidCount > 0) {
-        messageEl.innerHTML = `<i class="fas fa-info-circle"></i> Є неоплачені (${unpaidCount})`;
+        messageEl.innerHTML = `<i class="fas fa-exclamation-circle"></i> Є боржники (${unpaidCount})`;
     } else {
         messageEl.innerHTML = '';
     }
@@ -488,9 +488,7 @@ async function handleConfirmAttendance() {
         closeAttendanceModal();
         await loadAssignmentsForDate(lessonDate); // Reload assignments to reflect changes
     } catch (error) {
-        console.error('Помилка збереження відвідування:', error);
-        showNotification('Помилка збереження відвідування: ' + (error.message || 'Невідома помилка'), 'error');
     } finally {
-        setBtnLoading('confirmAttendanceBtn', false, '<i class="fas fa-check"></i> Підтвердити');
+        setBtnLoading('confirmAttendanceBtn', false, '<i class="fas fa-save"></i> Зберегти та підтвердити');
     }
 }

@@ -70,20 +70,6 @@ async def cleanup_history(
     db.commit()
     return None
 
-@router.delete("/history/cleanup", status_code=204)
-async def cleanup_history(
-    before: date = Query(..., description="Дата, до якої видаляти історію"),
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    """Видалення старих записів історії (тільки адмін)."""
-    if current_user.role != "admin":
-        raise HTTPException(status_code=403, detail="Тільки адміністратор може видаляти історію")
-    
-    db.query(Attendance).filter(Attendance.date < before).delete(synchronize_session=False)
-    db.commit()
-    return None
-
 @router.post("/finalize", status_code=200)
 async def finalize_attendance_to_history(
     history_entries: List[dict],
