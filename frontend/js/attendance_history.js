@@ -280,12 +280,12 @@ async function exportToPDF() {
 
     printContainer.innerHTML = pdfStyles + reportHeader + element.innerHTML;
     
-    // Видаляємо останню колонку (Дії) з кожного рядка для чистого звіту
-    const actionsHeader = printContainer.querySelector('th:last-child');
+    // Видаляємо останню колонку (Дії) лише з заголовку та основних рядків (tbody)
+    const actionsHeader = printContainer.querySelector('thead th:last-child');
     if (actionsHeader) actionsHeader.remove();
     
-    const actionCells = printContainer.querySelectorAll('td:last-child');
-    actionCells.forEach(cell => cell.remove());
+    const bodyActionCells = printContainer.querySelectorAll('tbody td:last-child');
+    bodyActionCells.forEach(cell => cell.remove());
 
     // ПЕРЕВІРКА ТА ВИПРАВЛЕННЯ СУМИ:
     // Примусово показуємо футер та переконуємось, що він має правильний клас
