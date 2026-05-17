@@ -15,7 +15,7 @@ let allUsers = []; // Зберігаємо список для швидкого 
 async function loadUsers() {
     try {
         console.log('Fetching users...');
-        const response = await apiRequest('/api/users');
+        const response = await apiRequest('/api/users/');
         
         // Підтримка обох форматів: {users: [...]} або просто [...]
         allUsers = Array.isArray(response) ? response : (response.users || []);
@@ -218,7 +218,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         try {
             const method = userId ? 'PUT' : 'POST';
-            const url = userId ? `/api/users/${userId}` : '/api/users';
+            const url = userId ? `/api/users/${userId}` : '/api/users/';
 
             await apiRequest(url, {
                 method: method,

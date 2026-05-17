@@ -67,7 +67,7 @@ async function refreshAccessToken() {
             throw new Error('LocalStorage недоступний (можливо, приватний режим Safari)');
         }
 
-        const response = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
+        const response = await fetch(`${API_BASE_URL}/api/auth/refresh/`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ refresh_token: refreshToken })
@@ -109,14 +109,18 @@ async function apiRequest(endpoint, options = {}) {
 
     // ПОВНЕ ВИПРАВЛЕННЯ Mixed Content:
     // Використовуємо лише відносний шлях, якщо API_BASE_URL порожній.
-    // Також прибираємо можливий подвійний слеш.
-    let url = endpoint;
-    if (API_BASE_URL) {
-        url = `${API_BASE_URL}${endpoint}`;
-    } else if (!endpoint.startsWith('/')) {
-        url = '/' + endpoint;
+    // Автоматично додаємо закриваючий слеш, якщо немає параметрів або розширення файлу.
+    let normalizedEndpoint = endpoint;
+    if (!normalizedEndpoint.includes('?') && !normalizedEndpoint.endsWith('/') && !/\.[a-z0-9]+$/i.test(normalizedEndpoint)) {
+        normalizedEndpoint += '/';
     }
 
+    let url = normalizedEndpoint;
+    if (API_BASE_URL) {
+        url = `${API_BASE_URL}${normalizedEndpoint}`;
+    } else if (!normalizedEndpoint.startsWith('/')) {
+        url = '/' + normalizedEndpoint;
+    }
     try {
         const response = await fetch(url, {
             ...options,
@@ -124,7 +128,7 @@ async function apiRequest(endpoint, options = {}) {
         });
 
         // Якщо 401 і це НЕ запит на авторизацію/оновлення
-        if (response.status === 401 && !options._retry && !endpoint.includes('/auth/')) {
+        if (response.status === 401 && !options._retry && !normalizedEndpoint.includes('/auth/')) {
             options._retry = true;
             try {
                 const newAccessToken = await refreshAccessToken();
@@ -132,7 +136,7 @@ async function apiRequest(endpoint, options = {}) {
                     ...headers,
                     'Authorization': `Bearer ${newAccessToken}`
                 };
-                return await apiRequest(endpoint, { ...options, headers: retryHeaders });
+                return await apiRequest(normalizedEndpoint, { ...options, headers: retryHeaders });
             } catch (refreshError) {
                 return;
             }
@@ -171,7 +175,7 @@ async function apiRequest(endpoint, options = {}) {
 // Auth API
 const authAPI = {
     async login(username, password) {
-        const data = await apiRequest('/api/auth/login', {
+        const data = await apiRequest('/api/auth/login/', {
             method: 'POST',
             body: JSON.stringify({ username, password })
         });
@@ -180,7 +184,7 @@ const authAPI = {
     },
 
     async getMe() {
-        const user = await apiRequest('/api/auth/me');
+        const user = await apiRequest('/api/auth/me/');
         setUser(user);
         return user;
     },
@@ -195,7 +199,7 @@ const authAPI = {
 const studentsAPI = {
     async getAll(params = {}) {
         const searchParams = new URLSearchParams(params).toString();
-        const endpoint = searchParams ? `/api/students?${searchParams}` : '/api/students';
+        const endpoint = searchParams ? `/api/students/?${searchParams}` : '/api/students/';
         return await apiRequest(endpoint);
     },
 
@@ -204,7 +208,7 @@ const studentsAPI = {
     },
 
     async create(student) {
-        return await apiRequest('/api/students', {
+        return await apiRequest('/api/students/', {
             method: 'POST',
             body: JSON.stringify(student)
         });
@@ -228,7 +232,7 @@ const studentsAPI = {
 const attendanceAPI = {
     async getAll(params = {}) {
         const searchParams = new URLSearchParams(params).toString();
-        const endpoint = searchParams ? `/api/attendance?${searchParams}` : '/api/attendance';
+        const endpoint = searchParams ? `/api/attendance/?${searchParams}` : '/api/attendance/';
         return await apiRequest(endpoint);
     },
 
@@ -241,7 +245,7 @@ const attendanceAPI = {
     },
 
     async mark(attendance) {
-        return await apiRequest('/api/attendance', {
+        return await apiRequest('/api/attendance/', {
             method: 'POST',
             body: JSON.stringify(attendance)
         });
@@ -267,7 +271,7 @@ const attendanceAPI = {
     },
     async getHistory(params = {}) {
         const searchParams = new URLSearchParams(params).toString();
-        const endpoint = searchParams ? `/api/attendance/history?${searchParams}` : '/api/attendance/history';
+        const endpoint = searchParams ? `/api/attendance/history/?${searchParams}` : '/api/attendance/history/';
         return await apiRequest(endpoint);
     },
     async updateHistoryEntry(id, data) {
@@ -286,10 +290,10 @@ const attendanceAPI = {
 // Price List API (Крок 2: Каталог послуг)
 const pricesAPI = {
     async getAll() {
-        return await apiRequest('/api/prices');
+        return await apiRequest('/api/prices/');
     },
     async create(priceData) {
-        return await apiRequest('/api/prices', {
+        return await apiRequest('/api/prices/', {
             method: 'POST',
             body: JSON.stringify(priceData)
         });
@@ -311,7 +315,7 @@ const pricesAPI = {
 const paymentsAPI = {
     async getAll(params = {}) {
         const searchParams = new URLSearchParams(params).toString();
-        const endpoint = searchParams ? `/api/payments?${searchParams}` : '/api/payments';
+        const endpoint = searchParams ? `/api/payments/?${searchParams}` : '/api/payments/';
         return await apiRequest(endpoint);
     },
 
@@ -324,7 +328,7 @@ const paymentsAPI = {
     },
 
     async create(payment) {
-        return await apiRequest('/api/payments', {
+        return await apiRequest('/api/payments/', {
             method: 'POST',
             body: JSON.stringify(payment)
         });
@@ -348,13 +352,13 @@ const paymentsAPI = {
 const assignmentsAPI = {
     async getAll(params = {}) {
         const searchParams = new URLSearchParams(params).toString();
-        return await apiRequest(searchParams ? `/api/assignments?${searchParams}` : '/api/assignments');
+        return await apiRequest(searchParams ? `/api/assignments/?${searchParams}` : '/api/assignments/');
     },
     async getByTrainer(trainerId) {
         return await apiRequest(`/api/assignments/trainer/${trainerId}`);
     },
     async create(data) {
-        return await apiRequest('/api/assignments', {
+        return await apiRequest('/api/assignments/', {
             method: 'POST',
             body: JSON.stringify(data)
         });
@@ -371,7 +375,7 @@ const assignmentsAPI = {
         });
     },
     async cleanup(dateBefore) {
-        return await apiRequest(`/api/assignments?before=${dateBefore}`, {
+        return await apiRequest(`/api/assignments/?before=${dateBefore}`, {
             method: 'DELETE'
         });
     }
@@ -393,11 +397,11 @@ const subscriptionsAPI = {
 // Stats API
 const statsAPI = {
     async getDashboard() {
-        return await apiRequest('/api/stats/dashboard');
+        return await apiRequest('/api/stats/dashboard/');
     },
 
     async getAttendance(limit = 50) {
-        return await apiRequest(`/api/stats/attendance?limit=${limit}`);
+        return await apiRequest(`/api/stats/attendance/?limit=${limit}`);
     }
 };
 
@@ -405,7 +409,7 @@ const statsAPI = {
 const groupsAPI = {
     async getAll(params = {}) {
         const searchParams = new URLSearchParams(params).toString();
-        const endpoint = searchParams ? `/api/groups?${searchParams}` : '/api/groups';
+        const endpoint = searchParams ? `/api/groups/?${searchParams}` : '/api/groups/';
         return await apiRequest(endpoint);
     },
 
@@ -414,7 +418,7 @@ const groupsAPI = {
     },
 
     async create(group) {
-        return await apiRequest('/api/groups', {
+        return await apiRequest('/api/groups/', {
             method: 'POST',
             body: JSON.stringify(group)
         });
@@ -438,7 +442,7 @@ const groupsAPI = {
 const trainersAPI = {
     async getAll(params = {}) {
         const searchParams = new URLSearchParams(params).toString();
-        const endpoint = searchParams ? `/api/trainers?${searchParams}` : '/api/trainers';
+        const endpoint = searchParams ? `/api/trainers/?${searchParams}` : '/api/trainers/';
         return await apiRequest(endpoint);
     },
 
