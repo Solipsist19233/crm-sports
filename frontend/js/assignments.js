@@ -40,22 +40,35 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 async function loadAllData() {
-    const results = await Promise.allSettled([
-        assignmentsAPI.getAll(),
-        groupsAPI.getAll({ is_active: true }),
-        trainersAPI.getAll(),
-        studentsAPI.getAll({ is_active: true }),
-        pricesAPI.getAll()
-    ]);
+    try {
+        const results = await Promise.allSettled([
+            assignmentsAPI.getAll(),
+            groupsAPI.getAll({ is_active: true }),
+            trainersAPI.getAll(),
+            studentsAPI.getAll({ is_active: true }),
+            pricesAPI.getAll()
+        ]);
 
-    allAssignments = results[0].status === 'fulfilled' ? results[0].value : [];
-    allGroups = results[1].status === 'fulfilled' ? results[1].value : [];
-    allTrainers = results[2].status === 'fulfilled' ? results[2].value : [];
-    allStudents = results[3].status === 'fulfilled' ? results[3].value : [];
-    allPrices = results[4].status === 'fulfilled' ? results[4].value : [];
+        // Функція для безпечного витягування масиву (якщо бекенд повертає {data: [...]})
+        const getArray = (res) => {
+            if (res.status !== 'fulfilled' || !res.value) return [];
+            return Array.isArray(res.value) ? res.value : (res.value.trainers || res.value.groups || res.value.students || res.value.prices || []);
+        };
 
-    renderAssignmentsCards(allAssignments);
-    populateSelects();
+        allAssignments = getArray(results[0]);
+        allGroups = getArray(results[1]);
+        allTrainers = getArray(results[2]);
+        allStudents = getArray(results[3]);
+        allPrices = getArray(results[4]);
+
+        console.log('Loaded trainers:', allTrainers.length);
+
+        renderAssignmentsCards(allAssignments);
+        populateSelects();
+    } catch (err) {
+        console.error('Критична помилка завантаження даних:', err);
+        showNotification('Помилка завантаження списків', 'error');
+    }
 }
 
 function populateSelects() {

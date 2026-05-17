@@ -107,21 +107,26 @@ async function apiRequest(endpoint, options = {}) {
         headers['Authorization'] = `Bearer ${token}`;
     }
 
-    // ПОВНЕ ВИПРАВЛЕННЯ Mixed Content:
-    // Використовуємо лише відносний шлях, якщо API_BASE_URL порожній.
-    // Автоматично додаємо закриваючий слеш, якщо немає параметрів або розширення файлу.
-    let normalizedEndpoint = endpoint;
-    if (!normalizedEndpoint.includes('?') && !normalizedEndpoint.endsWith('/') && !/\.[a-z0-9]+$/i.test(normalizedEndpoint)) {
-        normalizedEndpoint += '/';
+    // Покращена нормалізація шляху для Safari:
+    // 1. Розділяємо шлях та параметри
+    let [path, query] = endpoint.split('?');
+    
+    // 2. Додаємо закриваючий слеш до шляху, якщо його немає і це не файл
+    if (!path.endsWith('/') && !/\.[a-z0-9]+$/i.test(path)) {
+        path += '/';
     }
+    
+    // 3. Збираємо назад
+    let normalizedEndpoint = query ? `${path}?${query}` : path;
 
-    let url = normalizedEndpoint;
-    if (API_BASE_URL) {
-        url = `${API_BASE_URL}${normalizedEndpoint}`;
-    } else if (!normalizedEndpoint.startsWith('/')) {
-        url = '/' + normalizedEndpoint;
-    }
+    // Для iPhone Safari краще використовувати повні URL
+    const baseUrl = API_BASE_URL || window.location.origin;
+    let url = normalizedEndpoint.startsWith('http') 
+        ? normalizedEndpoint 
+        : `${baseUrl.replace(/\/+$/, '')}/${normalizedEndpoint.replace(/^\/+/, '')}`;
+
     try {
+        console.log(`API Request: ${options.method || 'GET'} ${url}`);
         const response = await fetch(url, {
             ...options,
             headers
