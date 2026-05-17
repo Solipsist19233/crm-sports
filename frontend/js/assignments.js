@@ -72,11 +72,23 @@ async function loadAllData() {
 }
 
 function populateSelects() {
-    document.getElementById('groupId').innerHTML = '<option value="">Оберіть групу...</option>' + 
-        allGroups.map(g => `<option value="${g.id}">${g.name}</option>`).join('');
+    const groupSelect = document.getElementById('groupId');
+    const trainerSelect = document.getElementById('trainerId');
 
-    document.getElementById('trainerId').innerHTML = '<option value="">Оберіть тренера...</option>' + 
-        allTrainers.map(t => `<option value="${t.id}">${t.first_name} ${t.last_name}</option>`).join('');
+    if (groupSelect) {
+        groupSelect.innerHTML = '<option value="">Оберіть групу...</option>' + 
+            allGroups.map(g => `<option value="${g.id}">${g.name}</option>`).join('');
+    }
+
+    if (trainerSelect) {
+        trainerSelect.innerHTML = '<option value="">Оберіть тренера...</option>' + 
+            allTrainers.map(t => {
+                // Гнучка підтримка імен: full_name або сума частин
+                const name = t.full_name || `${t.first_name || ''} ${t.last_name || ''}`.trim() || `Тренер #${t.id}`;
+                // Використовуємо t.id, але якщо в консолі бачиш проблеми з ідентифікацією - перевір бекенд
+                return `<option value="${t.id}">${name}</option>`;
+            }).join('');
+    }
 }
 
 document.getElementById('groupId').addEventListener('change', function() {
