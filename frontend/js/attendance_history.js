@@ -33,6 +33,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 async function loadInitialData() {
+    console.log('History: Завантаження початкових даних (учні, тренери, ціни)...');
     const results = await Promise.allSettled([
         studentsAPI.getAll({ is_active: true }),
         trainersAPI.getAll(),

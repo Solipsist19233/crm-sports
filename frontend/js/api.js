@@ -209,7 +209,7 @@ const studentsAPI = {
     },
 
     async getById(id) {
-        return await apiRequest(`/api/students/${id}`);
+        return await apiRequest(`/api/students/${id}/`);
     },
 
     async create(student) {
@@ -220,14 +220,14 @@ const studentsAPI = {
     },
 
     async update(id, student) {
-        return await apiRequest(`/api/students/${id}`, {
+        return await apiRequest(`/api/students/${id}/`, {
             method: 'PUT',
             body: JSON.stringify(student)
         });
     },
 
     async delete(id) {
-        return await apiRequest(`/api/students/${id}`, {
+        return await apiRequest(`/api/students/${id}/`, {
             method: 'DELETE'
         });
     }
@@ -242,11 +242,11 @@ const attendanceAPI = {
     },
 
     async getByDate(date) {
-        return await apiRequest(`/api/attendance/date/${date}`);
+        return await apiRequest(`/api/attendance/date/${date}/`);
     },
 
     async getByStudent(studentId) {
-        return await apiRequest(`/api/attendance/student/${studentId}`);
+        return await apiRequest(`/api/attendance/student/${studentId}/`);
     },
 
     async mark(attendance) {
@@ -257,19 +257,19 @@ const attendanceAPI = {
     },
 
     async update(id, attendance) {
-        return await apiRequest(`/api/attendance/${id}`, {
+        return await apiRequest(`/api/attendance/${id}/`, {
             method: 'PUT',
             body: JSON.stringify(attendance)
         });
     },
 
     async delete(id) {
-        return await apiRequest(`/api/attendance/${id}`, {
+        return await apiRequest(`/api/attendance/${id}/`, {
             method: 'DELETE'
         });
     },
     async finalize(data) {
-        return await apiRequest('/api/attendance/finalize', {
+        return await apiRequest('/api/attendance/finalize/', {
             method: 'POST',
             body: JSON.stringify(data)
         });
@@ -280,13 +280,13 @@ const attendanceAPI = {
         return await apiRequest(endpoint);
     },
     async updateHistoryEntry(id, data) {
-        return await apiRequest(`/api/attendance/history/${id}`, {
+        return await apiRequest(`/api/attendance/history/${id}/`, {
             method: 'PUT',
             body: JSON.stringify(data)
         });
     },
     async cleanupHistory(dateBefore) {
-        return await apiRequest(`/api/attendance/history/cleanup?before=${dateBefore}`, {
+        return await apiRequest(`/api/attendance/history/cleanup/?before=${dateBefore}`, {
             method: 'DELETE'
         });
     }
@@ -304,13 +304,13 @@ const pricesAPI = {
         });
     },
     async update(id, priceData) {
-        return await apiRequest(`/api/prices/${id}`, {
+        return await apiRequest(`/api/prices/${id}/`, {
             method: 'PUT',
             body: JSON.stringify(priceData)
         });
     },
     async delete(id) {
-        return await apiRequest(`/api/prices/${id}`, {
+        return await apiRequest(`/api/prices/${id}/`, {
             method: 'DELETE'
         });
     }
@@ -325,11 +325,11 @@ const paymentsAPI = {
     },
 
     async getOverdue() {
-        return await apiRequest('/api/payments/overdue');
+        return await apiRequest('/api/payments/overdue/');
     },
 
     async getByStudent(studentId) {
-        return await apiRequest(`/api/payments/student/${studentId}`);
+        return await apiRequest(`/api/payments/student/${studentId}/`);
     },
 
     async create(payment) {
@@ -340,14 +340,14 @@ const paymentsAPI = {
     },
 
     async update(id, payment) {
-        return await apiRequest(`/api/payments/${id}`, {
+        return await apiRequest(`/api/payments/${id}/`, {
             method: 'PUT',
             body: JSON.stringify(payment)
         });
     },
 
     async delete(id) {
-        return await apiRequest(`/api/payments/${id}`, {
+        return await apiRequest(`/api/payments/${id}/`, {
             method: 'DELETE'
         });
     }
@@ -360,7 +360,7 @@ const assignmentsAPI = {
         return await apiRequest(searchParams ? `/api/assignments/?${searchParams}` : '/api/assignments/');
     },
     async getByTrainer(trainerId) {
-        return await apiRequest(`/api/assignments/trainer/${trainerId}`);
+        return await apiRequest(`/api/assignments/trainer/${trainerId}/`);
     },
     async create(data) {
         return await apiRequest('/api/assignments/', {
@@ -369,13 +369,13 @@ const assignmentsAPI = {
         });
     },
     async update(id, data) {
-        return await apiRequest(`/api/assignments/${id}`, {
+        return await apiRequest(`/api/assignments/${id}/`, {
             method: 'PUT',
             body: JSON.stringify(data)
         });
     },
     async delete(id) {
-        return await apiRequest(`/api/assignments/${id}`, {
+        return await apiRequest(`/api/assignments/${id}/`, {
             method: 'DELETE'
         });
     },
@@ -389,7 +389,7 @@ const assignmentsAPI = {
 // Subscriptions API (Крок 6: Абонементи)
 const subscriptionsAPI = {
     async getByStudent(studentId) {
-        return await apiRequest(`/api/subscriptions/student/${studentId}`);
+        return await apiRequest(`/api/subscriptions/student/${studentId}/`);
     },
     async buy(data) {
         return await apiRequest('/api/subscriptions/', {
@@ -419,7 +419,7 @@ const groupsAPI = {
     },
 
     async getById(id) {
-        return await apiRequest(`/api/groups/${id}`);
+        return await apiRequest(`/api/groups/${id}/`);
     },
 
     async create(group) {
@@ -430,14 +430,14 @@ const groupsAPI = {
     },
 
     async update(id, group) {
-        return await apiRequest(`/api/groups/${id}`, {
+        return await apiRequest(`/api/groups/${id}/`, {
             method: 'PUT',
             body: JSON.stringify(group)
         });
     },
 
     async delete(id) {
-        return await apiRequest(`/api/groups/${id}`, {
+        return await apiRequest(`/api/groups/${id}/`, {
             method: 'DELETE'
         });
     }
@@ -452,7 +452,7 @@ const trainersAPI = {
     },
 
     async getById(id) {
-        return await apiRequest(`/api/trainers/${id}`);
+        return await apiRequest(`/api/trainers/${id}/`);
     }
 };
 

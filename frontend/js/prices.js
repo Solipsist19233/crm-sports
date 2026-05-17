@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 async function loadPrices() {
     try {
+        console.log('Prices: Завантаження прайс-листа...');
         const tbody = document.getElementById('pricesTable');
         allPrices = await pricesAPI.getAll();
         renderPrices(allPrices);
