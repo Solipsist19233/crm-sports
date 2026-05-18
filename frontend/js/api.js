@@ -115,9 +115,9 @@ async function apiRequest(endpoint, options = {}) {
 
     // Формуємо фінальний абсолютний URL
     const baseUrl = (API_BASE_URL || window.location.origin).replace(/\/+$/, '');
-    let url = endpoint.startsWith('http')
-        ? endpoint 
-        : `${baseUrl}/${endpoint.replace(/^\/+/, '')}`;
+    // Видаляємо закриваючий слеш, якщо він є, щоб уникнути 307 редиректів від FastAPI
+    let cleanedEndpoint = endpoint.replace(/\/+$/, '');
+    let url = cleanedEndpoint.startsWith('http') ? cleanedEndpoint : `${baseUrl}/${cleanedEndpoint.replace(/^\/+/, '')}`;
 
     // Примусово використовуємо HTTPS для продуктиву (Safari 307 fix)
     if (!url.includes('localhost') && !url.includes('127.0.0.1')) {
@@ -132,7 +132,7 @@ async function apiRequest(endpoint, options = {}) {
         });
 
         // Якщо 401 і це НЕ запит на авторизацію/оновлення
-        if (response.status === 401 && !options._retry && !endpoint.includes('/auth/')) {
+        if (response.status === 401 && !options._retry && !cleanedEndpoint.includes('/auth')) {
             options._retry = true;
             try {
                 const newAccessToken = await refreshAccessToken();
@@ -140,7 +140,7 @@ async function apiRequest(endpoint, options = {}) {
                     ...headers,
                     'Authorization': `Bearer ${newAccessToken}`
                 };
-                return await apiRequest(endpoint, { ...options, headers: retryHeaders });
+                return await apiRequest(cleanedEndpoint, { ...options, headers: retryHeaders });
             } catch (refreshError) {
                 return;
             }
@@ -180,7 +180,7 @@ async function apiRequest(endpoint, options = {}) {
 // Auth API
 const authAPI = {
     async login(username, password) {
-        const data = await apiRequest('/api/auth/login/', {
+        const data = await apiRequest('/api/auth/login', {
             method: 'POST',
             body: JSON.stringify({ username, password })
         });
@@ -189,7 +189,7 @@ const authAPI = {
     },
 
     async getMe() {
-        const user = await apiRequest('/api/auth/me/');
+        const user = await apiRequest('/api/auth/me');
         setUser(user);
         return user;
     },
@@ -204,30 +204,30 @@ const authAPI = {
 const studentsAPI = {
     async getAll(params = {}) {
         const searchParams = new URLSearchParams(params).toString();
-        const endpoint = searchParams ? `/api/students/?${searchParams}` : '/api/students/';
+        const endpoint = searchParams ? `/api/students?${searchParams}` : '/api/students';
         return await apiRequest(endpoint);
     },
 
     async getById(id) {
-        return await apiRequest(`/api/students/${id}/`);
+        return await apiRequest(`/api/students/${id}`);
     },
 
     async create(student) {
-        return await apiRequest('/api/students/', {
+        return await apiRequest('/api/students', {
             method: 'POST',
             body: JSON.stringify(student)
         });
     },
 
     async update(id, student) {
-        return await apiRequest(`/api/students/${id}/`, {
+        return await apiRequest(`/api/students/${id}`, {
             method: 'PUT',
             body: JSON.stringify(student)
         });
     },
 
     async delete(id) {
-        return await apiRequest(`/api/students/${id}/`, {
+        return await apiRequest(`/api/students/${id}`, {
             method: 'DELETE'
         });
     }
@@ -237,56 +237,56 @@ const studentsAPI = {
 const attendanceAPI = {
     async getAll(params = {}) {
         const searchParams = new URLSearchParams(params).toString();
-        const endpoint = searchParams ? `/api/attendance/?${searchParams}` : '/api/attendance/';
+        const endpoint = searchParams ? `/api/attendance?${searchParams}` : '/api/attendance';
         return await apiRequest(endpoint);
     },
 
     async getByDate(date) {
-        return await apiRequest(`/api/attendance/date/${date}/`);
+        return await apiRequest(`/api/attendance/date/${date}`);
     },
 
     async getByStudent(studentId) {
-        return await apiRequest(`/api/attendance/student/${studentId}/`);
+        return await apiRequest(`/api/attendance/student/${studentId}`);
     },
 
     async mark(attendance) {
-        return await apiRequest('/api/attendance/', {
+        return await apiRequest('/api/attendance', {
             method: 'POST',
             body: JSON.stringify(attendance)
         });
     },
 
     async update(id, attendance) {
-        return await apiRequest(`/api/attendance/${id}/`, {
+        return await apiRequest(`/api/attendance/${id}`, {
             method: 'PUT',
             body: JSON.stringify(attendance)
         });
     },
 
     async delete(id) {
-        return await apiRequest(`/api/attendance/${id}/`, {
+        return await apiRequest(`/api/attendance/${id}`, {
             method: 'DELETE'
         });
     },
     async finalize(data) {
-        return await apiRequest('/api/attendance/finalize/', {
+        return await apiRequest('/api/attendance/finalize', {
             method: 'POST',
             body: JSON.stringify(data)
         });
     },
     async getHistory(params = {}) {
         const searchParams = new URLSearchParams(params).toString();
-        const endpoint = searchParams ? `/api/attendance/history/?${searchParams}` : '/api/attendance/history/';
+        const endpoint = searchParams ? `/api/attendance/history?${searchParams}` : '/api/attendance/history';
         return await apiRequest(endpoint);
     },
     async updateHistoryEntry(id, data) {
-        return await apiRequest(`/api/attendance/history/${id}/`, {
+        return await apiRequest(`/api/attendance/history/${id}`, {
             method: 'PUT',
             body: JSON.stringify(data)
         });
     },
     async cleanupHistory(dateBefore) {
-        return await apiRequest(`/api/attendance/history/cleanup/?before=${dateBefore}`, {
+        return await apiRequest(`/api/attendance/history/cleanup?before=${dateBefore}`, {
             method: 'DELETE'
         });
     }
@@ -304,13 +304,13 @@ const pricesAPI = {
         });
     },
     async update(id, priceData) {
-        return await apiRequest(`/api/prices/${id}`, {
+        return await apiRequest(`/api/prices/${id}`, { // Already correct
             method: 'PUT',
             body: JSON.stringify(priceData)
         });
     },
     async delete(id) {
-        return await apiRequest(`/api/prices/${id}`, {
+        return await apiRequest(`/api/prices/${id}`, { // Already correct
             method: 'DELETE'
         });
     }
@@ -320,34 +320,34 @@ const pricesAPI = {
 const paymentsAPI = {
     async getAll(params = {}) {
         const searchParams = new URLSearchParams(params).toString();
-        const endpoint = searchParams ? `/api/payments/?${searchParams}` : '/api/payments/';
+        const endpoint = searchParams ? `/api/payments?${searchParams}` : '/api/payments';
         return await apiRequest(endpoint);
     },
 
     async getOverdue() {
-        return await apiRequest('/api/payments/overdue/');
+        return await apiRequest('/api/payments/overdue');
     },
 
     async getByStudent(studentId) {
-        return await apiRequest(`/api/payments/student/${studentId}/`);
+        return await apiRequest(`/api/payments/student/${studentId}`);
     },
 
     async create(payment) {
-        return await apiRequest('/api/payments/', {
+        return await apiRequest('/api/payments', {
             method: 'POST',
             body: JSON.stringify(payment)
         });
     },
 
     async update(id, payment) {
-        return await apiRequest(`/api/payments/${id}/`, {
+        return await apiRequest(`/api/payments/${id}`, {
             method: 'PUT',
             body: JSON.stringify(payment)
         });
     },
 
     async delete(id) {
-        return await apiRequest(`/api/payments/${id}/`, {
+        return await apiRequest(`/api/payments/${id}`, {
             method: 'DELETE'
         });
     }
@@ -357,25 +357,25 @@ const paymentsAPI = {
 const assignmentsAPI = {
     async getAll(params = {}) {
         const searchParams = new URLSearchParams(params).toString();
-        return await apiRequest(searchParams ? `/api/assignments/?${searchParams}` : '/api/assignments/');
+        return await apiRequest(searchParams ? `/api/assignments?${searchParams}` : '/api/assignments');
     },
     async getByTrainer(trainerId) {
-        return await apiRequest(`/api/assignments/trainer/${trainerId}/`);
+        return await apiRequest(`/api/assignments/trainer/${trainerId}`);
     },
     async create(data) {
-        return await apiRequest('/api/assignments/', {
+        return await apiRequest('/api/assignments', {
             method: 'POST',
             body: JSON.stringify(data)
         });
     },
     async update(id, data) {
-        return await apiRequest(`/api/assignments/${id}/`, {
+        return await apiRequest(`/api/assignments/${id}`, {
             method: 'PUT',
             body: JSON.stringify(data)
         });
     },
     async delete(id) {
-        return await apiRequest(`/api/assignments/${id}/`, {
+        return await apiRequest(`/api/assignments/${id}`, {
             method: 'DELETE'
         });
     },
@@ -389,10 +389,10 @@ const assignmentsAPI = {
 // Subscriptions API (Крок 6: Абонементи)
 const subscriptionsAPI = {
     async getByStudent(studentId) {
-        return await apiRequest(`/api/subscriptions/student/${studentId}/`);
+        return await apiRequest(`/api/subscriptions/student/${studentId}`);
     },
     async buy(data) {
-        return await apiRequest('/api/subscriptions/', {
+        return await apiRequest('/api/subscriptions', {
             method: 'POST',
             body: JSON.stringify(data)
         });
@@ -402,11 +402,11 @@ const subscriptionsAPI = {
 // Stats API
 const statsAPI = {
     async getDashboard() {
-        return await apiRequest('/api/stats/dashboard/');
+        return await apiRequest('/api/stats/dashboard');
     },
 
     async getAttendance(limit = 50) {
-        return await apiRequest(`/api/stats/attendance/?limit=${limit}`);
+        return await apiRequest(`/api/stats/attendance?limit=${limit}`);
     }
 };
 
@@ -414,30 +414,30 @@ const statsAPI = {
 const groupsAPI = {
     async getAll(params = {}) {
         const searchParams = new URLSearchParams(params).toString();
-        const endpoint = searchParams ? `/api/groups/?${searchParams}` : '/api/groups/';
+        const endpoint = searchParams ? `/api/groups?${searchParams}` : '/api/groups';
         return await apiRequest(endpoint);
     },
 
     async getById(id) {
-        return await apiRequest(`/api/groups/${id}/`);
+        return await apiRequest(`/api/groups/${id}`);
     },
 
     async create(group) {
-        return await apiRequest('/api/groups/', {
+        return await apiRequest('/api/groups', {
             method: 'POST',
             body: JSON.stringify(group)
         });
     },
 
     async update(id, group) {
-        return await apiRequest(`/api/groups/${id}/`, {
+        return await apiRequest(`/api/groups/${id}`, {
             method: 'PUT',
             body: JSON.stringify(group)
         });
     },
 
     async delete(id) {
-        return await apiRequest(`/api/groups/${id}/`, {
+        return await apiRequest(`/api/groups/${id}`, {
             method: 'DELETE'
         });
     }
@@ -447,12 +447,12 @@ const groupsAPI = {
 const trainersAPI = {
     async getAll(params = {}) {
         const searchParams = new URLSearchParams(params).toString();
-        const endpoint = searchParams ? `/api/trainers?${searchParams}` : '/api/trainers';
+        const endpoint = searchParams ? `/api/trainers?${searchParams}` : '/api/trainers'; // Already correct
         return await apiRequest(endpoint);
     },
 
     async getById(id) {
-        return await apiRequest(`/api/trainers/${id}/`);
+        return await apiRequest(`/api/trainers/${id}`);
     }
 };
 
