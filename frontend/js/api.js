@@ -236,16 +236,16 @@ const studentsAPI = {
 const attendanceAPI = {
     async getAll(params = {}) {
         const searchParams = new URLSearchParams(params).toString();
-        const endpoint = searchParams ? `/api/attendance/?${searchParams}` : '/api/attendance/';
+        const endpoint = searchParams ? `/api/attendance?${searchParams}` : '/api/attendance';
         return await apiRequest(endpoint);
     },
 
     async getByDate(date) {
-        return await apiRequest(`/api/attendance/date/${date}/`);
+        return await apiRequest(`/api/attendance/date/${date}`);
     },
 
     async getByStudent(studentId) {
-        return await apiRequest(`/api/attendance/student/${studentId}/`);
+        return await apiRequest(`/api/attendance/student/${studentId}`);
     },
 
     async mark(attendance) {
