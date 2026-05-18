@@ -26,7 +26,7 @@ let allPricelistItems = [];
 
 async function loadSubscriptions() {
     try {
-        const subscriptions = await apiRequest('/api/subscriptions');
+        const subscriptions = await apiRequest('/api/subscriptions/');
         allSubscriptions = subscriptions;
         displaySubscriptions(allSubscriptions);
     } catch (error) {
@@ -88,7 +88,7 @@ async function openAddSubscriptionModal() {
 
 async function openEditSubscriptionModal(subscriptionId) {
     try {
-        const sub = await apiRequest(`/api/subscriptions/${subscriptionId}`);
+        const sub = await apiRequest(`/api/subscriptions/${subscriptionId}/`);
         await populateStudentAndPricelistDropdowns();
 
         document.getElementById('subscriptionId').value = sub.id;
@@ -110,10 +110,10 @@ window.closeSubscriptionModal = function() {
 async function populateStudentAndPricelistDropdowns() {
     try {
         if (allStudents.length === 0) {
-            allStudents = await apiRequest('/api/subscriptions/students_for_dropdown');
+            allStudents = await apiRequest('/api/subscriptions/students_for_dropdown/');
         }
         if (allPricelistItems.length === 0) {
-            allPricelistItems = await apiRequest('/api/subscriptions/pricelist_subscriptions');
+            allPricelistItems = await apiRequest('/api/subscriptions/pricelist_subscriptions/');
         }
     } catch (error) {
         console.error('Error populating dropdowns:', error);
@@ -139,12 +139,12 @@ async function handleSubscriptionFormSubmit(event) {
 
     try {
         if (id) {
-            await apiRequest(`/api/subscriptions/${id}`, {
+            await apiRequest(`/api/subscriptions/${id}/`, {
                 method: 'PUT',
                 body: JSON.stringify(data)
             });
         } else {
-            await apiRequest('/api/subscriptions', {
+            await apiRequest('/api/subscriptions/', {
                 method: 'POST',
                 body: JSON.stringify(data)
             });
@@ -161,7 +161,7 @@ async function handleSubscriptionFormSubmit(event) {
 async function deleteSubscription(id) {
     if (!confirm('Видалити цей абонемент?')) return;
     try {
-        await apiRequest(`/api/subscriptions/${id}`, { method: 'DELETE' });
+        await apiRequest(`/api/subscriptions/${id}/`, { method: 'DELETE' });
         showNotification('Абонемент видалено', 'success');
         await loadSubscriptions();
     } catch (error) {

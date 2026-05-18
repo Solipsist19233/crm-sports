@@ -390,10 +390,10 @@ const assignmentsAPI = {
 // Subscriptions API (Крок 6: Абонементи)
 const subscriptionsAPI = {
     async getByStudent(studentId) {
-        return await apiRequest(`/api/subscriptions/student/${studentId}`);
+        return await apiRequest(`/api/subscriptions/student/${studentId}/`);
     },
     async buy(data) {
-        return await apiRequest('/api/subscriptions', {
+        return await apiRequest('/api/subscriptions/', {
             method: 'POST',
             body: JSON.stringify(data)
         });
