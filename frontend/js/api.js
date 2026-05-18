@@ -67,7 +67,13 @@ async function refreshAccessToken() {
             throw new Error('LocalStorage недоступний (можливо, приватний режим Safari)');
         }
 
-        const response = await fetch(`${API_BASE_URL}/api/auth/refresh/`, {
+        const baseUrl = API_BASE_URL || window.location.origin;
+        let url = `${baseUrl.replace(/\/+$/, '')}/api/auth/refresh/`;
+        if (!url.includes('localhost') && !url.includes('127.0.0.1')) {
+            url = url.replace('http://', 'https://');
+        }
+
+        const response = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ refresh_token: refreshToken })
@@ -121,9 +127,14 @@ async function apiRequest(endpoint, options = {}) {
 
     // Для iPhone Safari краще використовувати повні URL
     const baseUrl = API_BASE_URL || window.location.origin;
-    let url = normalizedEndpoint.startsWith('http') 
+    let url = normalizedEndpoint.startsWith('http')
         ? normalizedEndpoint 
         : `${baseUrl.replace(/\/+$/, '')}/${normalizedEndpoint.replace(/^\/+/, '')}`;
+
+    // Примусово використовуємо HTTPS для продуктиву (Safari 307 fix)
+    if (!url.includes('localhost') && !url.includes('127.0.0.1')) {
+        url = url.replace('http://', 'https://');
+    }
 
     try {
         console.log(`API Request: ${options.method || 'GET'} ${url}`);
@@ -164,6 +175,7 @@ async function apiRequest(endpoint, options = {}) {
         } catch (e) { data = { detail: "Помилка обробки відповіді сервера" }; }
 
         if (!response.ok) {
+            console.error(`Деталі помилки API (${response.status}):`, data);
             const errorMsg = typeof data.detail === 'object' ? JSON.stringify(data.detail) : data.detail;
             const error = new Error(errorMsg || 'Запит відхилено сервером');
             error.status = response.status;
