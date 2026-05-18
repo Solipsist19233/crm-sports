@@ -236,7 +236,8 @@ const studentsAPI = {
 const attendanceAPI = {
     async getAll(params = {}) {
         const searchParams = new URLSearchParams(params).toString();
-        const endpoint = searchParams ? `/api/attendance?${searchParams}` : '/api/attendance';
+        // Backend (attendance.py) uses @router.get("/") -> needs trailing slash
+        const endpoint = searchParams ? `/api/attendance/?${searchParams}` : '/api/attendance/';
         return await apiRequest(endpoint);
     },
 
@@ -249,7 +250,8 @@ const attendanceAPI = {
     },
 
     async mark(attendance) {
-        return await apiRequest('/api/attendance', {
+        // Backend (attendance.py) uses @router.post("/") -> needs trailing slash
+        return await apiRequest('/api/attendance/', {
             method: 'POST',
             body: JSON.stringify(attendance)
         });
@@ -297,7 +299,7 @@ const pricesAPI = {
         return await apiRequest('/api/prices');
     },
     async create(priceData) {
-        return await apiRequest('/api/prices/', {
+        return await apiRequest('/api/prices', {
             method: 'POST',
             body: JSON.stringify(priceData)
         });
@@ -379,7 +381,7 @@ const assignmentsAPI = {
         });
     },
     async cleanup(dateBefore) {
-        return await apiRequest(`/api/assignments/?before=${dateBefore}`, {
+        return await apiRequest(`/api/assignments?before=${dateBefore}`, {
             method: 'DELETE'
         });
     }
@@ -446,7 +448,7 @@ const groupsAPI = {
 const trainersAPI = {
     async getAll(params = {}) {
         const searchParams = new URLSearchParams(params).toString();
-        const endpoint = searchParams ? `/api/trainers/?${searchParams}` : '/api/trainers/';
+        const endpoint = searchParams ? `/api/trainers?${searchParams}` : '/api/trainers';
         return await apiRequest(endpoint);
     },
 

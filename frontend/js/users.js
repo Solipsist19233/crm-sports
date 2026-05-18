@@ -218,7 +218,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         try {
             const method = userId ? 'PUT' : 'POST';
-            const url = userId ? `/api/users/${userId}` : '/api/users/';
+            const url = userId ? `/api/users/${userId}` : '/api/users';
 
             await apiRequest(url, {
                 method: method,
