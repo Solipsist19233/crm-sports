@@ -113,23 +113,23 @@ async function apiRequest(endpoint, options = {}) {
         headers['Authorization'] = `Bearer ${token}`;
     }
 
-    // Покращена нормалізація шляху для Safari:
-    // 1. Розділяємо шлях та параметри
-    let [path, query] = endpoint.split('?');
-    
-    // 2. Додаємо закриваючий слеш до шляху, якщо його немає і це не файл
-    if (!path.endsWith('/') && !/\.[a-z0-9]+$/i.test(path)) {
-        path += '/';
+    // Покращена нормалізація шляху для Safari та Chrome:
+    let normalizedEndpoint = endpoint;
+    if (!normalizedEndpoint.startsWith('http')) {
+        let [path, query] = normalizedEndpoint.split('?');
+        
+        // Додаємо закриваючий слеш, якщо це не файл (немає крапки в назві)
+        if (!path.endsWith('/') && !path.split('/').pop().includes('.')) {
+            path += '/';
+        }
+        normalizedEndpoint = query ? `${path}?${query}` : path;
     }
-    
-    // 3. Збираємо назад
-    let normalizedEndpoint = query ? `${path}?${query}` : path;
 
-    // Для iPhone Safari краще використовувати повні URL
-    const baseUrl = API_BASE_URL || window.location.origin;
+    // Формуємо фінальний абсолютний URL
+    const baseUrl = (API_BASE_URL || window.location.origin).replace(/\/+$/, '');
     let url = normalizedEndpoint.startsWith('http')
         ? normalizedEndpoint 
-        : `${baseUrl.replace(/\/+$/, '')}/${normalizedEndpoint.replace(/^\/+/, '')}`;
+        : `${baseUrl}/${normalizedEndpoint.replace(/^\/+/, '')}`;
 
     // Примусово використовуємо HTTPS для продуктиву (Safari 307 fix)
     if (!url.includes('localhost') && !url.includes('127.0.0.1')) {
