@@ -447,8 +447,7 @@ const groupsAPI = {
 const trainersAPI = {
     async getAll(params = {}) {
         const searchParams = new URLSearchParams(params).toString();
-        const endpoint = searchParams ? `/api/attendance/history?${searchParams}` : '/api/attendance/history';
-        const endpoint = searchParams ? `/api/groups?${searchParams}` : '/api/groups';
+        const endpoint = searchParams ? `/api/trainers?${searchParams}` : '/api/trainers';
         return await apiRequest(endpoint);
     },
 
