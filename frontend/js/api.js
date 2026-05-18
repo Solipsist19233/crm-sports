@@ -68,7 +68,7 @@ async function refreshAccessToken() {
         }
 
         const baseUrl = API_BASE_URL || window.location.origin;
-        let url = `${baseUrl.replace(/\/+$/, '')}/api/auth/refresh/`;
+        let url = `${baseUrl.replace(/\/+$/, '')}/api/auth/refresh`;
         if (!url.includes('localhost') && !url.includes('127.0.0.1')) {
             url = url.replace('http://', 'https://');
         }
@@ -115,9 +115,8 @@ async function apiRequest(endpoint, options = {}) {
 
     // Формуємо фінальний абсолютний URL
     const baseUrl = (API_BASE_URL || window.location.origin).replace(/\/+$/, '');
-    // Видаляємо закриваючий слеш, якщо він є, щоб уникнути 307 редиректів від FastAPI
-    let cleanedEndpoint = endpoint.replace(/\/+$/, '');
-    let url = cleanedEndpoint.startsWith('http') ? cleanedEndpoint : `${baseUrl}/${cleanedEndpoint.replace(/^\/+/, '')}`;
+    // НЕ видаляємо слеш автоматично, Safari потребує точного збігу
+    let url = endpoint.startsWith('http') ? endpoint : `${baseUrl}/${endpoint.replace(/^\/+/, '')}`;
 
     // Примусово використовуємо HTTPS для продуктиву (Safari 307 fix)
     if (!url.includes('localhost') && !url.includes('127.0.0.1')) {
@@ -132,7 +131,7 @@ async function apiRequest(endpoint, options = {}) {
         });
 
         // Якщо 401 і це НЕ запит на авторизацію/оновлення
-        if (response.status === 401 && !options._retry && !cleanedEndpoint.includes('/auth')) {
+        if (response.status === 401 && !options._retry && !endpoint.includes('/auth')) {
             options._retry = true;
             try {
                 const newAccessToken = await refreshAccessToken();
@@ -140,7 +139,7 @@ async function apiRequest(endpoint, options = {}) {
                     ...headers,
                     'Authorization': `Bearer ${newAccessToken}`
                 };
-                return await apiRequest(cleanedEndpoint, { ...options, headers: retryHeaders });
+                return await apiRequest(endpoint, { ...options, headers: retryHeaders });
             } catch (refreshError) {
                 return;
             }
@@ -237,16 +236,16 @@ const studentsAPI = {
 const attendanceAPI = {
     async getAll(params = {}) {
         const searchParams = new URLSearchParams(params).toString();
-        const endpoint = searchParams ? `/api/attendance?${searchParams}` : '/api/attendance';
+        const endpoint = searchParams ? `/api/attendance/?${searchParams}` : '/api/attendance/';
         return await apiRequest(endpoint);
     },
 
     async getByDate(date) {
-        return await apiRequest(`/api/attendance/date/${date}`);
+        return await apiRequest(`/api/attendance/date/${date}/`);
     },
 
     async getByStudent(studentId) {
-        return await apiRequest(`/api/attendance/student/${studentId}`);
+        return await apiRequest(`/api/attendance/student/${studentId}/`);
     },
 
     async mark(attendance) {
@@ -447,7 +446,7 @@ const groupsAPI = {
 const trainersAPI = {
     async getAll(params = {}) {
         const searchParams = new URLSearchParams(params).toString();
-        const endpoint = searchParams ? `/api/trainers?${searchParams}` : '/api/trainers'; // Already correct
+        const endpoint = searchParams ? `/api/trainers/?${searchParams}` : '/api/trainers/';
         return await apiRequest(endpoint);
     },
 

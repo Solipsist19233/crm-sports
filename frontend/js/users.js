@@ -15,7 +15,7 @@ let allUsers = []; // Зберігаємо список для швидкого 
 async function loadUsers() {
     try {
         console.log('Fetching users...');
-        const response = await apiRequest('/api/users/');
+        const response = await apiRequest('/api/users');
         
         // Підтримка обох форматів: {users: [...]} або просто [...]
         allUsers = Array.isArray(response) ? response : (response.users || []);
